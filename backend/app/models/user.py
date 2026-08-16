@@ -38,7 +38,7 @@ class User(Base):
 
     password = Column(
         Text,
-        nullable=False
+        nullable=True
     )
 
     role = Column(

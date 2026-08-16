@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 from app.models.user import UserRole
 
 
+
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
@@ -35,3 +36,6 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+class GoogleLoginRequest(BaseModel):
+    credential: str

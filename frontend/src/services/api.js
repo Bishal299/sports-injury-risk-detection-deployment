@@ -48,6 +48,33 @@ export async function loginUser(credentials) {
   return data;
 }
 
+export async function loginWithGoogle(credential) {
+  const response = await fetch(
+    `${API_BASE_URL}/auth/google`,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        credential,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || "Google login failed"
+    );
+  }
+
+  return data;
+}
+
 
 export async function getCurrentUser() {
   const token = localStorage.getItem("access_token");
@@ -232,4 +259,37 @@ export async function getMyVideos() {
   }
 
   return data;
+}
+
+export async function deleteVideo(videoId) {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/videos/${videoId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    let message = "Failed to delete video";
+
+    try {
+      const data = await response.json();
+      message = data.detail || message;
+    } catch {
+      // 204 response has no body
+    }
+
+    throw new Error(message);
+  }
+
+  return true;
 }

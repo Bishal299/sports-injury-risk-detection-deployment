@@ -1,39 +1,32 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
 
 import { registerUser } from "../services/api";
+import "../styles/auth.css";
 
 
 function Register() {
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    role: "Athlete",
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-
-
-  const handleChange = (event) => {
-
-    const {
-      name,
-      value
-    } = event.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-  };
 
 
   const handleSubmit = async (event) => {
@@ -43,34 +36,15 @@ function Register() {
     setError("");
     setSuccess("");
 
-    // Basic validation
-    if (!formData.name.trim()) {
-      setError("Name is required");
-      return;
-    }
 
-    if (!formData.email.trim()) {
-      setError("Email is required");
-      return;
-    }
+    if (!name || !email || !password) {
 
-    if (!formData.password) {
-      setError("Password is required");
-      return;
-    }
-
-    if (formData.password.length < 8) {
       setError(
-        "Password must be at least 8 characters"
+        "Please fill in all required fields."
       );
-      return;
-    }
 
-    if (formData.password.length > 72) {
-      setError(
-        "Password must not exceed 72 characters"
-      );
       return;
+
     }
 
 
@@ -78,17 +52,22 @@ function Register() {
 
       setLoading(true);
 
-      const result = await registerUser(formData);
+      await registerUser({
+        name,
+        email,
+        password,
+      });
 
-      console.log("Registration successful:", result);
 
       setSuccess(
-        "Registration successful! Redirecting to login..."
+        "Account created successfully. Redirecting to login..."
       );
+
 
       setTimeout(() => {
         navigate("/login");
-      }, 1500);
+      }, 1200);
+
 
     } catch (error) {
 
@@ -99,189 +78,291 @@ function Register() {
       setLoading(false);
 
     }
+
   };
 
 
   return (
-    <div>
 
-      <h1>
-        Sports Injury Risk Detection
-      </h1>
+    <div className="auth-page">
 
-      <h2>
-        Create Account
-      </h2>
+      {/* Branding */}
 
+      <div className="auth-brand">
 
-      {error && (
-        <p style={{ color: "red" }}>
-          {error}
-        </p>
-      )}
+        <div className="auth-brand-content">
 
+          <div className="auth-logo">
 
-      {success && (
-        <p style={{ color: "green" }}>
-          {success}
-        </p>
-      )}
+            <div className="auth-logo-icon">
+              S
+            </div>
+
+            <div>
+              <h2>SportRisk</h2>
+              <span>Injury Detection</span>
+            </div>
+
+          </div>
 
 
-      <form onSubmit={handleSubmit}>
+          <div className="auth-brand-text">
 
-        {/* Name */}
+            <p className="auth-eyebrow">
+              START YOUR JOURNEY
+            </p>
 
-        <div>
-          <label>
-            Name
-          </label>
+            <h1>
+              Build a safer
+              <br />
+              training routine.
+            </h1>
 
-          <br />
+            <p>
+              Create your athlete account and get
+              started with intelligent sports performance
+              monitoring.
+            </p>
 
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter your name"
-          />
+          </div>
+
+
+          <div className="auth-trust">
+
+            <ShieldCheck size={20} />
+
+            <span>
+              Your performance data stays protected
+            </span>
+
+          </div>
+
         </div>
 
-
-        <br />
-
-
-        {/* Email */}
-
-        <div>
-          <label>
-            Email
-          </label>
-
-          <br />
-
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-          />
-        </div>
+      </div>
 
 
-        <br />
+      {/* Form */}
+
+      <div className="auth-form-section">
+
+        <div className="auth-form-wrapper">
+
+          <div className="auth-mobile-logo">
+
+            <div className="auth-logo-icon">
+              S
+            </div>
+
+            <div>
+              <h2>SportRisk</h2>
+              <span>Injury Detection</span>
+            </div>
+
+          </div>
 
 
-        {/* Password */}
+          <div className="auth-heading">
 
-        <div>
-          <label>
-            Password
-          </label>
+            <p className="auth-eyebrow">
+              GET STARTED
+            </p>
 
-          <br />
+            <h1>
+              Create your account
+            </h1>
 
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-          />
-        </div>
+            <p>
+              Set up your athlete profile in a few
+              simple steps.
+            </p>
 
-
-        <br />
+          </div>
 
 
-        {/* Phone */}
+          {error && (
 
-        <div>
-          <label>
-            Phone
-          </label>
+            <div className="auth-error">
+              {error}
+            </div>
 
-          <br />
-
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="Enter your phone number"
-          />
-        </div>
+          )}
 
 
-        <br />
+          {success && (
+
+            <div className="auth-success">
+              {success}
+            </div>
+
+          )}
 
 
-        {/* Role */}
-
-        <div>
-          <label>
-            Role
-          </label>
-
-          <br />
-
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
+          <form
+            className="auth-form"
+            onSubmit={handleSubmit}
           >
 
-            <option value="Athlete">
-              Athlete
-            </option>
+            {/* Name */}
 
-            <option value="Coach">
-              Coach
-            </option>
+            <div className="form-group">
 
-            <option value="Physiotherapist">
-              Physiotherapist
-            </option>
+              <label htmlFor="name">
+                Full name
+              </label>
 
-            <option value="Sports Scientist">
-              Sports Scientist
-            </option>
+              <div className="input-wrapper">
 
-            <option value="Administrator">
-              Administrator
-            </option>
+                <User size={19} />
 
-          </select>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="Your full name"
+                  value={name}
+                  onChange={(event) =>
+                    setName(event.target.value)
+                  }
+                  autoComplete="name"
+                />
+
+              </div>
+
+            </div>
+
+
+            {/* Email */}
+
+            <div className="form-group">
+
+              <label htmlFor="email">
+                Email address
+              </label>
+
+              <div className="input-wrapper">
+
+                <Mail size={19} />
+
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(event) =>
+                    setEmail(event.target.value)
+                  }
+                  autoComplete="email"
+                />
+
+              </div>
+
+            </div>
+
+
+            {/* Password */}
+
+            <div className="form-group">
+
+              <label htmlFor="password">
+                Password
+              </label>
+
+              <div className="input-wrapper">
+
+                <Lock size={19} />
+
+                <input
+                  id="password"
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(event.target.value)
+                  }
+                  autoComplete="new-password"
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
+                >
+
+                  {showPassword
+                    ? <EyeOff size={19} />
+                    : <Eye size={19} />
+                  }
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <button
+              type="submit"
+              className="auth-submit"
+              disabled={loading}
+            >
+
+              {loading
+                ? "Creating account..."
+                : (
+                  <>
+                    Create account
+                    <ArrowRight size={19} />
+                  </>
+                )
+              }
+
+            </button>
+
+          </form>
+
+
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+
+
+          <button
+            type="button"
+            className="google-button"
+            onClick={() => {}}
+          >
+
+            <span className="google-icon">
+              G
+            </span>
+
+            Sign up with Google
+
+          </button>
+
+
+          <p className="auth-footer">
+
+            Already have an account?{" "}
+
+            <Link to="/login">
+              Sign in
+            </Link>
+
+          </p>
 
         </div>
 
-
-        <br />
-
-
-        <button
-          type="submit"
-          disabled={loading}
-        >
-          {loading
-            ? "Creating Account..."
-            : "Register"
-          }
-        </button>
-
-      </form>
-
-
-      <p>
-        Already have an account?{" "}
-        <Link to="/login">
-          Login
-        </Link>
-      </p>
+      </div>
 
     </div>
+
   );
 }
 

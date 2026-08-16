@@ -1,0 +1,847 @@
+/* =========================================
+   VIDEO UPLOAD PAGE
+========================================= */
+
+.upload-page {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 10px 0 50px;
+
+  animation: uploadFadeIn 0.4s ease;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.upload-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 30px;
+}
+
+.upload-header h1 {
+  margin: 5px 0 8px;
+
+  font-size: clamp(1.9rem, 4vw, 2.4rem);
+
+  letter-spacing: -0.035em;
+}
+
+.upload-header p:last-child {
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 0.95rem;
+}
+
+.upload-back-button {
+  min-height: 42px;
+
+  padding: 0 15px;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 10px;
+
+  background: var(--bg-card);
+
+  color: var(--text-primary);
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.upload-back-button:hover {
+  border-color: var(--border-hover);
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================
+   ALERTS
+========================================= */
+
+.upload-success,
+.upload-error {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 20px;
+
+  padding: 14px 16px;
+
+  border-radius: 12px;
+}
+
+.upload-success {
+  border: 1px solid var(--success-border);
+
+  background: var(--success-bg);
+
+  color: var(--success-text);
+}
+
+.upload-error {
+  border: 1px solid var(--danger-border);
+
+  background: var(--danger-bg);
+
+  color: var(--danger-text);
+}
+
+.upload-success p,
+.upload-error p {
+  margin: 3px 0 0;
+
+  font-size: 0.82rem;
+}
+
+.success-icon,
+.error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 25px;
+  height: 25px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  font-weight: 800;
+}
+
+.success-icon {
+  background: var(--success);
+
+  color: white;
+}
+
+.error-icon {
+  background: var(--danger);
+
+  color: white;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.upload-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+
+/* =========================================
+   SECTIONS
+========================================= */
+
+.upload-section {
+  padding: 28px;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 18px;
+
+  background: var(--bg-card);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.upload-section-heading {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  margin-bottom: 23px;
+}
+
+.upload-section-number {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 11px;
+
+  background: var(--accent-soft);
+
+  color: var(--accent);
+
+  font-size: 0.7rem;
+
+  font-weight: 800;
+}
+
+.upload-section-heading h2 {
+  margin: 0;
+
+  font-size: 1.05rem;
+}
+
+.upload-section-heading p {
+  margin: 4px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 0.8rem;
+}
+
+
+/* =========================================
+   DROP ZONE
+========================================= */
+
+.drop-zone {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-height: 260px;
+
+  padding: 30px;
+
+  border: 1.5px dashed var(--border-color);
+
+  border-radius: 15px;
+
+  background: var(--bg-secondary);
+
+  text-align: center;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.drop-zone:hover,
+.drop-zone-active {
+  border-color: var(--accent);
+
+  background: var(--accent-soft);
+
+  transform: translateY(-2px);
+}
+
+.drop-zone-selected {
+  border-style: solid;
+
+  border-color: var(--success);
+
+  background: var(--success-bg);
+}
+
+.upload-icon,
+.selected-file-icon {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 58px;
+  height: 58px;
+
+  margin-bottom: 16px;
+
+  border-radius: 50%;
+
+  font-size: 1.5rem;
+
+  font-weight: 700;
+}
+
+.upload-icon {
+  background: var(--accent-soft);
+
+  color: var(--accent);
+}
+
+.selected-file-icon {
+  background: var(--success-bg);
+
+  color: var(--success);
+}
+
+.drop-zone h3 {
+  margin: 0 0 7px;
+
+  font-size: 1rem;
+}
+
+.drop-zone p {
+  margin: 0 0 8px;
+
+  color: var(--text-secondary);
+
+  font-size: 0.85rem;
+}
+
+.drop-zone p span {
+  color: var(--accent);
+
+  font-weight: 600;
+}
+
+.drop-zone small {
+  color: var(--text-muted);
+
+  font-size: 0.72rem;
+}
+
+.change-file {
+  margin-top: 10px;
+
+  color: var(--accent);
+
+  font-size: 0.78rem;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   ACTIVITY
+========================================= */
+
+.activity-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.activity-field label {
+  font-size: 0.8rem;
+
+  font-weight: 600;
+}
+
+.activity-field input {
+  width: 100%;
+
+  height: 44px;
+
+  padding: 0 13px;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 10px;
+
+  outline: none;
+
+  background: var(--bg-primary);
+
+  color: var(--text-primary);
+
+  font-size: 0.9rem;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.activity-field input:focus {
+  border-color: var(--accent);
+
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.activity-field input::placeholder {
+  color: var(--text-muted);
+}
+
+.activity-field span {
+  color: var(--text-muted);
+
+  font-size: 0.72rem;
+}
+
+
+/* =========================================
+   SELECTED VIDEO
+========================================= */
+
+.selected-video-card {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 16px 18px;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 13px;
+
+  background: var(--bg-card);
+}
+
+.selected-video-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  min-width: 0;
+}
+
+.file-preview-icon {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: var(--accent-soft);
+
+  color: var(--accent);
+
+  font-size: 0.9rem;
+}
+
+.selected-video-info strong {
+  display: block;
+
+  max-width: 500px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 0.85rem;
+}
+
+.selected-video-info p {
+  margin: 3px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 0.72rem;
+}
+
+.ready-badge {
+  padding: 5px 10px;
+
+  flex-shrink: 0;
+
+  border-radius: 999px;
+
+  background: var(--success-bg);
+
+  color: var(--success-text);
+
+  font-size: 0.7rem;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.upload-actions {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding-top: 3px;
+}
+
+.cancel-upload-button,
+.submit-upload-button {
+  min-height: 44px;
+
+  padding: 0 20px;
+
+  border-radius: 10px;
+
+  font-family: inherit;
+
+  font-size: 0.85rem;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.cancel-upload-button {
+  border: 1px solid var(--border-color);
+
+  background: var(--bg-card);
+
+  color: var(--text-primary);
+}
+
+.cancel-upload-button:hover:not(:disabled) {
+  border-color: var(--border-hover);
+}
+
+.submit-upload-button {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  border: 1px solid var(--accent);
+
+  background: var(--accent);
+
+  color: var(--accent-contrast);
+}
+
+.submit-upload-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  opacity: 0.9;
+}
+
+.submit-upload-button:disabled,
+.cancel-upload-button:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   SPINNER
+========================================= */
+
+.upload-spinner {
+  width: 15px;
+  height: 15px;
+
+  border: 2px solid rgba(255, 255, 255, 0.35);
+
+  border-top-color: white;
+
+  border-radius: 50%;
+
+  animation: uploadSpin 0.7s linear infinite;
+}
+
+@keyframes uploadSpin {
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =========================================
+   RESULT
+========================================= */
+
+.upload-result {
+  margin-top: 25px;
+
+  padding: 25px;
+
+  border: 1px solid var(--success-border);
+
+  border-radius: 18px;
+
+  background: var(--success-bg);
+
+  animation: uploadFadeIn 0.4s ease;
+}
+
+.result-header {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  margin-bottom: 22px;
+}
+
+.result-success-icon {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: var(--success);
+
+  color: white;
+
+  font-weight: 800;
+}
+
+.result-header h2 {
+  margin: 0;
+
+  color: var(--success-text);
+
+  font-size: 1.05rem;
+}
+
+.result-header p {
+  margin: 3px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 0.8rem;
+}
+
+
+/* =========================================
+   RESULT GRID
+========================================= */
+
+.result-grid {
+  display: grid;
+
+  grid-template-columns: repeat(5, 1fr);
+
+  gap: 10px;
+
+  margin-bottom: 20px;
+}
+
+.result-grid > div {
+  padding: 12px;
+
+  border-radius: 10px;
+
+  background: var(--bg-card);
+}
+
+.result-grid span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--text-secondary);
+
+  font-size: 0.68rem;
+}
+
+.result-grid strong {
+  font-size: 0.8rem;
+}
+
+
+/* =========================================
+   VIEW VIDEOS
+========================================= */
+
+.view-videos-button {
+  min-height: 42px;
+
+  padding: 0 17px;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 10px;
+
+  background: var(--bg-card);
+
+  color: var(--text-primary);
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.view-videos-button:hover {
+  border-color: var(--accent);
+
+  color: var(--accent);
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================
+   ANIMATION
+========================================= */
+
+@keyframes uploadFadeIn {
+
+  from {
+    opacity: 0;
+
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 800px) {
+
+  .result-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .upload-page {
+    padding-bottom: 30px;
+  }
+
+  .upload-header {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 18px;
+  }
+
+  .upload-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .upload-back-button {
+    align-self: flex-start;
+  }
+
+  .upload-section {
+    padding: 20px 16px;
+
+    border-radius: 14px;
+  }
+
+  .drop-zone {
+    min-height: 220px;
+
+    padding: 20px;
+  }
+
+  .selected-video-card {
+    align-items: flex-start;
+  }
+
+  .ready-badge {
+    margin-top: 2px;
+  }
+
+  .upload-actions {
+    flex-direction: column-reverse;
+
+    align-items: stretch;
+  }
+
+  .cancel-upload-button,
+  .submit-upload-button {
+    width: 100%;
+  }
+
+  .result-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .result-grid > div:last-child {
+    grid-column: span 2;
+  }
+
+  .upload-result {
+    padding: 20px 16px;
+  }
+
+  .view-videos-button {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 380px) {
+
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-grid > div:last-child {
+    grid-column: auto;
+  }
+
+}

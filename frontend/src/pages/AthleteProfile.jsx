@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import DashboardLayout from "../layouts/DashboardLayout";
 
 import {
   getAthleteProfile,
   createAthleteProfile,
   updateAthleteProfile,
 } from "../services/api";
+
+import DashboardLayout from "../layouts/DashboardLayout";
+
+import "../styles/athlete-profile.css";
 
 
 function AthleteProfile() {
@@ -109,6 +114,7 @@ function AthleteProfile() {
       setSaving(true);
 
       const profileData = {
+
         sport: formData.sport,
         position: formData.position,
 
@@ -123,6 +129,7 @@ function AthleteProfile() {
         endurance: Number(formData.endurance),
 
         coach_notes: formData.coach_notes,
+
       };
 
 
@@ -131,7 +138,6 @@ function AthleteProfile() {
 
       if (profileExists) {
 
-        // Existing profile → UPDATE
         data = await updateAthleteProfile(
           profileData
         );
@@ -142,7 +148,6 @@ function AthleteProfile() {
 
       } else {
 
-        // No profile → CREATE
         data = await createAthleteProfile(
           profileData
         );
@@ -156,7 +161,6 @@ function AthleteProfile() {
       }
 
 
-      // Make sure the form contains the latest database values
       setFormData({
         sport: data.sport ?? "",
         position: data.position ?? "",
@@ -170,6 +174,7 @@ function AthleteProfile() {
         endurance: data.endurance ?? "",
         coach_notes: data.coach_notes ?? "",
       });
+
 
     } catch (error) {
 
@@ -187,254 +192,480 @@ function AthleteProfile() {
   if (loading) {
 
     return (
-      <div>
-        <h1>Athlete Profile</h1>
+      <DashboardLayout>
 
-        <p>
-          Loading profile...
-        </p>
-      </div>
+        <div className="profile-loading">
+
+          <div className="profile-spinner"></div>
+
+          <p>
+            Loading athlete profile...
+          </p>
+
+        </div>
+
+      </DashboardLayout>
     );
 
   }
 
 
   return (
-    <div>
 
-      <h1>
-        Athlete Profile
-      </h1>
+    <DashboardLayout>
 
-
-      {error && (
-        <p style={{ color: "red" }}>
-          {error}
-        </p>
-      )}
+      <div className="profile-page">
 
 
-      {success && (
-        <p style={{ color: "green" }}>
-          {success}
-        </p>
-      )}
+        {/* PAGE HEADER */}
+
+        <div className="profile-page-header">
+
+          <div>
+
+            <p className="profile-eyebrow">
+              ATHLETE
+            </p>
+
+            <h1>
+              Athlete Profile
+            </h1>
+
+            <p>
+              Manage your personal and performance information.
+            </p>
+
+          </div>
 
 
-      <form onSubmit={handleSubmit}>
+          <div className="profile-status">
 
-        <div>
-          <label>Sport</label>
-          <br />
+            <span className="status-dot"></span>
 
-          <input
-            type="text"
-            name="sport"
-            value={formData.sport}
-            onChange={handleChange}
-            placeholder="e.g. Football"
-          />
+            {profileExists
+              ? "Profile active"
+              : "Profile not created"
+            }
+
+          </div>
+
         </div>
 
 
-        <br />
+        {/* ALERTS */}
+
+        {error && (
+
+          <div className="profile-alert profile-alert-error">
+
+            <span>!</span>
+
+            <p>{error}</p>
+
+          </div>
+
+        )}
 
 
-        <div>
-          <label>Position</label>
-          <br />
+        {success && (
 
-          <input
-            type="text"
-            name="position"
-            value={formData.position}
-            onChange={handleChange}
-            placeholder="e.g. Forward"
-          />
-        </div>
+          <div className="profile-alert profile-alert-success">
 
+            <span>✓</span>
 
-        <br />
+            <p>{success}</p>
+
+          </div>
+
+        )}
 
 
-        <div>
-          <label>Age</label>
-          <br />
+        {/* FORM */}
 
-          <input
-            type="number"
-            name="age"
-            value={formData.age}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Height (cm)</label>
-          <br />
-
-          <input
-            type="number"
-            step="0.1"
-            name="height"
-            value={formData.height}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Weight (kg)</label>
-          <br />
-
-          <input
-            type="number"
-            step="0.1"
-            name="weight"
-            value={formData.weight}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Training Load</label>
-          <br />
-
-          <input
-            type="number"
-            step="0.1"
-            name="training_load"
-            value={formData.training_load}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Flexibility</label>
-          <br />
-
-          <input
-            type="number"
-            step="0.1"
-            name="flexibility"
-            value={formData.flexibility}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Strength</label>
-          <br />
-
-          <input
-            type="number"
-            step="0.1"
-            name="strength"
-            value={formData.strength}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Balance</label>
-          <br />
-
-          <input
-            type="number"
-            step="0.1"
-            name="balance"
-            value={formData.balance}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Endurance</label>
-          <br />
-
-          <input
-            type="number"
-            step="0.1"
-            name="endurance"
-            value={formData.endurance}
-            onChange={handleChange}
-          />
-        </div>
-
-
-        <br />
-
-
-        <div>
-          <label>Coach Notes</label>
-          <br />
-
-          <textarea
-            name="coach_notes"
-            value={formData.coach_notes}
-            onChange={handleChange}
-            rows="4"
-            cols="40"
-          />
-        </div>
-
-
-        <br />
-
-
-        <button
-          type="submit"
-          disabled={saving}
+        <form
+          className="profile-form"
+          onSubmit={handleSubmit}
         >
-          {saving
-            ? "Saving..."
-            : profileExists
-              ? "Update Profile"
-              : "Create Profile"
-          }
-        </button>
-
-      </form>
 
 
-      <br />
+          {/* BASIC INFORMATION */}
+
+          <section className="profile-section">
+
+            <div className="section-heading">
+
+              <div className="section-icon">
+                01
+              </div>
+
+              <div>
+
+                <h2>
+                  Basic Information
+                </h2>
+
+                <p>
+                  Your sport and playing position.
+                </p>
+
+              </div>
+
+            </div>
 
 
-      <button
-        onClick={() => navigate("/dashboard")}
-      >
-        Back to Dashboard
-      </button>
+            <div className="form-grid">
 
-    </div>
+              <div className="form-field">
+
+                <label htmlFor="sport">
+                  Sport
+                </label>
+
+                <input
+                  id="sport"
+                  type="text"
+                  name="sport"
+                  value={formData.sport}
+                  onChange={handleChange}
+                  placeholder="e.g. Football"
+                  required
+                />
+
+              </div>
+
+
+              <div className="form-field">
+
+                <label htmlFor="position">
+                  Position
+                </label>
+
+                <input
+                  id="position"
+                  type="text"
+                  name="position"
+                  value={formData.position}
+                  onChange={handleChange}
+                  placeholder="e.g. Forward"
+                  required
+                />
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          {/* BODY INFORMATION */}
+
+          <section className="profile-section">
+
+            <div className="section-heading">
+
+              <div className="section-icon">
+                02
+              </div>
+
+              <div>
+
+                <h2>
+                  Physical Information
+                </h2>
+
+                <p>
+                  Basic physical measurements.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div className="form-grid form-grid-three">
+
+              <div className="form-field">
+
+                <label htmlFor="age">
+                  Age
+                </label>
+
+                <input
+                  id="age"
+                  type="number"
+                  name="age"
+                  value={formData.age}
+                  onChange={handleChange}
+                  min="1"
+                  max="100"
+                  placeholder="21"
+                  required
+                />
+
+              </div>
+
+
+              <div className="form-field">
+
+                <label htmlFor="height">
+                  Height
+                  <span>cm</span>
+                </label>
+
+                <input
+                  id="height"
+                  type="number"
+                  step="0.1"
+                  name="height"
+                  value={formData.height}
+                  onChange={handleChange}
+                  placeholder="173"
+                  required
+                />
+
+              </div>
+
+
+              <div className="form-field">
+
+                <label htmlFor="weight">
+                  Weight
+                  <span>kg</span>
+                </label>
+
+                <input
+                  id="weight"
+                  type="number"
+                  step="0.1"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  placeholder="65"
+                  required
+                />
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          {/* PERFORMANCE */}
+
+          <section className="profile-section">
+
+            <div className="section-heading">
+
+              <div className="section-icon">
+                03
+              </div>
+
+              <div>
+
+                <h2>
+                  Performance Metrics
+                </h2>
+
+                <p>
+                  Current physical performance indicators.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div className="form-grid form-grid-three">
+
+              <div className="form-field">
+
+                <label htmlFor="training_load">
+                  Training Load
+                </label>
+
+                <input
+                  id="training_load"
+                  type="number"
+                  step="0.1"
+                  name="training_load"
+                  value={formData.training_load}
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+
+              </div>
+
+
+              <div className="form-field">
+
+                <label htmlFor="flexibility">
+                  Flexibility
+                </label>
+
+                <input
+                  id="flexibility"
+                  type="number"
+                  step="0.1"
+                  name="flexibility"
+                  value={formData.flexibility}
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+
+              </div>
+
+
+              <div className="form-field">
+
+                <label htmlFor="strength">
+                  Strength
+                </label>
+
+                <input
+                  id="strength"
+                  type="number"
+                  step="0.1"
+                  name="strength"
+                  value={formData.strength}
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+
+              </div>
+
+
+              <div className="form-field">
+
+                <label htmlFor="balance">
+                  Balance
+                </label>
+
+                <input
+                  id="balance"
+                  type="number"
+                  step="0.1"
+                  name="balance"
+                  value={formData.balance}
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+
+              </div>
+
+
+              <div className="form-field">
+
+                <label htmlFor="endurance">
+                  Endurance
+                </label>
+
+                <input
+                  id="endurance"
+                  type="number"
+                  step="0.1"
+                  name="endurance"
+                  value={formData.endurance}
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          {/* COACH NOTES */}
+
+          <section className="profile-section">
+
+            <div className="section-heading">
+
+              <div className="section-icon">
+                04
+              </div>
+
+              <div>
+
+                <h2>
+                  Coach Notes
+                </h2>
+
+                <p>
+                  Additional information about your training.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div className="form-field">
+
+              <textarea
+                id="coach_notes"
+                name="coach_notes"
+                value={formData.coach_notes}
+                onChange={handleChange}
+                rows="5"
+                placeholder="Add any relevant notes about your training, previous observations, or goals..."
+              />
+
+            </div>
+
+          </section>
+
+
+          {/* ACTIONS */}
+
+          <div className="profile-actions">
+
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() =>
+                navigate("/dashboard")
+              }
+            >
+              Cancel
+            </button>
+
+
+            <button
+              type="submit"
+              className="save-profile-button"
+              disabled={saving}
+            >
+
+              {saving ? (
+                <>
+                  <span className="button-spinner"></span>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  {profileExists
+                    ? "Save Changes"
+                    : "Create Profile"
+                  }
+                </>
+              )}
+
+            </button>
+
+          </div>
+
+
+        </form>
+
+      </div>
+
+    </DashboardLayout>
+
   );
+
 }
 
 

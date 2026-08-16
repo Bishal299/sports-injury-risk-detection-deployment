@@ -118,7 +118,7 @@ def upload_video(
     video = Video(
     athlete_id=athlete.athlete_id,
     activity=activity,
-    video_url=file_path,
+    video_url=f"/uploads/videos/{unique_filename}",
     duration=metadata["duration"],
     fps=metadata["fps"],
     resolution=metadata["resolution"],
@@ -208,3 +208,61 @@ def get_video(
         )
 
     return video
+
+@router.delete(
+    "/{video_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_video(
+    video_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # 1. Find the athlete profile
+    athlete = (
+        db.query(Athlete)
+        .filter(
+            Athlete.user_id == current_user.user_id
+        )
+        .first()
+    )
+
+    if not athlete:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Athlete profile not found"
+        )
+
+    # 2. Find the video belonging to this athlete
+    video = (
+        db.query(Video)
+        .filter(
+            Video.video_id == video_id,
+            Video.athlete_id == athlete.athlete_id
+        )
+        .first()
+    )
+
+    if not video:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Video not found"
+        )
+
+    # 3. Delete physical video file
+    if video.video_url:
+        filename = os.path.basename(video.video_url)
+
+        file_path = os.path.join(
+            UPLOAD_DIR,
+            filename
+        )
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    # 4. Delete database record
+    db.delete(video)
+    db.commit()
+
+    return None

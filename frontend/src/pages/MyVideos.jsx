@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { getMyVideos } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import DashboardLayout from "../layouts/DashboardLayout";
+
+import {
+  getMyVideos,
+  deleteVideo
+} from "../services/api";
+
+import "../styles/my-videos.css";
 
 
 function MyVideos() {
@@ -7,7 +15,14 @@ function MyVideos() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
+  const navigate = useNavigate();
+
+
+  // -----------------------------
+  // Load Videos
+  // -----------------------------
 
   useEffect(() => {
 
@@ -36,116 +51,395 @@ function MyVideos() {
   }, []);
 
 
+  // -----------------------------
+  // Delete Video
+  // -----------------------------
+
+  const handleDelete = async (videoId) => {
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this video?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+
+      setDeletingId(videoId);
+      setError("");
+
+      await deleteVideo(videoId);
+
+      setVideos((currentVideos) =>
+        currentVideos.filter(
+          (video) => video.video_id !== videoId
+        )
+      );
+
+    } catch (error) {
+
+      setError(error.message);
+
+    } finally {
+
+      setDeletingId(null);
+
+    }
+
+  };
+
+
+  // -----------------------------
+  // Loading
+  // -----------------------------
+
   if (loading) {
-    return <h2>Loading videos...</h2>;
-  }
 
-
-  if (error) {
     return (
-      <div>
-        <h2>My Videos</h2>
+      <div className="videos-page">
 
-        <p style={{ color: "red" }}>
-          {error}
-        </p>
+        <div className="videos-loading">
+
+          <div className="loading-spinner"></div>
+
+          <p>Loading your videos...</p>
+
+        </div>
+
       </div>
     );
+
   }
 
 
+  // -----------------------------
+  // Error
+  // -----------------------------
+
+  if (error && videos.length === 0) {
+
+    return (
+      <div className="videos-page">
+
+        <div className="videos-header">
+
+          <div>
+
+            <p className="page-eyebrow">
+              VIDEO LIBRARY
+            </p>
+
+            <h1>My Videos</h1>
+
+            <p>
+              Manage your uploaded training videos.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div className="videos-error">
+
+          <div className="error-icon">
+            !
+          </div>
+
+          <h2>Unable to load videos</h2>
+
+          <p>
+            {error}
+          </p>
+
+          <button
+            className="secondary-button"
+            onClick={() => navigate("/dashboard")}
+          >
+            Back to Dashboard
+          </button>
+
+        </div>
+
+      </div>
+    );
+
+  }
+
+
+  // -----------------------------
+  // Main UI
+  // -----------------------------
+
   return (
-
-    <div>
-
-      <h1>My Videos</h1>
+   <DashboardLayout> 
+    <div className="videos-page">
 
 
-      {videos.length === 0 ? (
+      {/* Header */}
 
-        <p>
-          You have not uploaded any videos yet.
-        </p>
-
-      ) : (
+      <div className="videos-header">
 
         <div>
 
-          {videos.map((video) => (
+          <p className="page-eyebrow">
+            VIDEO LIBRARY
+          </p>
 
-            <div
-              key={video.video_id}
-              style={{
-                border: "1px solid #ccc",
-                padding: "15px",
-                marginBottom: "20px",
-                maxWidth: "600px"
-              }}
-            >
+          <h1>
+            My Videos
+          </h1>
 
-              <h2>
-                {video.activity || "Untitled Activity"}
-              </h2>
+          <p className="page-description">
+            Review and manage your uploaded training videos.
+          </p>
+
+        </div>
 
 
-              <p>
-                <strong>Status:</strong>{" "}
-                {video.processing_status}
-              </p>
+        <button
+          className="primary-button"
+          onClick={() => navigate("/video-upload")}
+        >
+          <span>+</span>
+          Upload Video
+        </button>
+
+      </div>
 
 
-              <p>
-                <strong>Duration:</strong>{" "}
-                {video.duration} seconds
-              </p>
+      {/* Error while deleting */}
 
+      {error && (
 
-              <p>
-                <strong>FPS:</strong>{" "}
-                {video.fps}
-              </p>
-
-
-              <p>
-                <strong>Resolution:</strong>{" "}
-                {video.resolution}
-              </p>
-
-
-              <p>
-                <strong>Uploaded:</strong>{" "}
-                {new Date(
-                  video.uploaded_at
-                ).toLocaleString()}
-              </p>
-
-
-            <video
-                controls
-                width="625"
-                preload="metadata"
-                >
-                <source
-                    src={
-                    video.video_url.startsWith("http")
-                        ? video.video_url
-                        : `http://127.0.0.1:8000${video.video_url}`
-                    }
-                    type="video/mp4"
-                />
-
-                Your browser does not support video playback.
-            </video>
-
-            </div>
-
-          ))}
-
+        <div className="inline-error">
+          {error}
         </div>
 
       )}
 
+
+      {/* Empty State */}
+
+      {videos.length === 0 ? (
+
+        <div className="empty-videos">
+
+          <div className="empty-video-icon">
+            ▶
+          </div>
+
+          <h2>
+            No videos yet
+          </h2>
+
+          <p>
+            Upload your first training video to start
+            monitoring your sports performance.
+          </p>
+
+          <button
+            className="primary-button"
+            onClick={() => navigate("/video-upload")}
+          >
+            Upload Your First Video
+          </button>
+
+        </div>
+
+      ) : (
+
+        <>
+
+          {/* Video count */}
+
+          <div className="video-library-info">
+
+            <span>
+              {videos.length}{" "}
+              {videos.length === 1 ? "video" : "videos"}
+            </span>
+
+          </div>
+
+
+          {/* Video Grid */}
+
+          <div className="videos-grid">
+
+            {videos.map((video) => {
+
+              const videoUrl =
+                video.video_url.startsWith("http")
+                  ? video.video_url
+                  : `http://127.0.0.1:8000${video.video_url}`;
+
+
+              return (
+
+                <article
+                  className="video-card"
+                  key={video.video_id}
+                >
+
+
+                  {/* Video */}
+
+                  <div className="video-preview">
+
+                    <video
+                      controls
+                      preload="metadata"
+                    >
+
+                      <source
+                        src={videoUrl}
+                        type="video/mp4"
+                      />
+
+                      Your browser does not support video playback.
+
+                    </video>
+
+                  </div>
+
+
+                  {/* Content */}
+
+                  <div className="video-card-content">
+
+
+                    {/* Title + status */}
+
+                    <div className="video-title-row">
+
+                      <div>
+
+                        <h2>
+                          {video.activity ||
+                            "Untitled Activity"}
+                        </h2>
+
+                        <p className="video-upload-date">
+                          Uploaded{" "}
+                          {new Date(
+                            video.uploaded_at
+                          ).toLocaleDateString()}
+                        </p>
+
+                      </div>
+
+
+                      <span className="video-status">
+                        {video.processing_status ||
+                          "Uploaded"}
+                      </span>
+
+                    </div>
+
+
+                    {/* Metadata */}
+
+                    <div className="video-metadata">
+
+
+                      <div className="metadata-item">
+
+                        <span className="metadata-label">
+                          Duration
+                        </span>
+
+                        <strong>
+                          {video.duration != null
+                            ? `${Number(video.duration).toFixed(1)}s`
+                            : "—"}
+                        </strong>
+
+                      </div>
+
+
+                      <div className="metadata-item">
+
+                        <span className="metadata-label">
+                          FPS
+                        </span>
+
+                        <strong>
+                          {video.fps || "—"}
+                        </strong>
+
+                      </div>
+
+
+                      <div className="metadata-item">
+
+                        <span className="metadata-label">
+                          Resolution
+                        </span>
+
+                        <strong>
+                          {video.resolution || "—"}
+                        </strong>
+
+                      </div>
+
+
+                    </div>
+
+
+                    {/* Actions */}
+
+                    <div className="video-actions">
+
+
+                      <button
+                        className="secondary-button"
+                        onClick={() =>
+                          navigate("/video-upload")
+                        }
+                      >
+                        Upload Another
+                      </button>
+
+
+                      <button
+                        className="delete-button"
+                        onClick={() =>
+                          handleDelete(video.video_id)
+                        }
+                        disabled={
+                          deletingId === video.video_id
+                        }
+                      >
+
+                        {deletingId === video.video_id
+                          ? "Deleting..."
+                          : "Delete"}
+
+                      </button>
+
+
+                    </div>
+
+
+                  </div>
+
+                </article>
+
+              );
+
+            })}
+
+          </div>
+
+        </>
+
+      )}
+  
     </div>
+  </DashboardLayout>
 
   );
 

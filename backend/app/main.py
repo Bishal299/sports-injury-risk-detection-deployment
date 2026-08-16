@@ -10,6 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine
 from app.models import User, UserRole, Athlete, InjuryHistory
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 

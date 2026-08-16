@@ -6,66 +6,93 @@ import {
   Route
 } from "react-router-dom";
 
+import { ThemeProvider } from "./context/ThemeContext";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AthleteProfile from "./pages/AthleteProfile";
 import VideoUpload from "./pages/VideoUpload";
 import MyVideos from "./pages/MyVideos";
+import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function App() {
 
   return (
-    <BrowserRouter>
 
-      <Routes>
+    <ThemeProvider>
 
-        <Route
-          path="/"
-          element={<Login />}
-        />
+      <BrowserRouter>
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+        <Routes>
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+          <Route
+            path="/"
+            element={<Login />}
+          />
 
-        <Route
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+          <Route
             path="/athlete-profile"
             element={
-                <ProtectedRoute>
+              <ProtectedRoute>
                 <AthleteProfile />
-                </ProtectedRoute>
+              </ProtectedRoute>
             }
-        />
-        <Route
+          />
+
+          <Route
             path="/video-upload"
-            element={<VideoUpload />}
-        />
-        <Route
+            element={
+              <ProtectedRoute>
+                <VideoUpload />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/my-videos"
-            element={<MyVideos />}
-        />
+            element={
+              <ProtectedRoute>
+                <MyVideos />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
 
-      </Routes>
+        </Routes>
 
-    </BrowserRouter>
+      </BrowserRouter>
+
+    </ThemeProvider>
+
   );
 }
 
