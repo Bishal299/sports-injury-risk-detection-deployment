@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   UserRound,
   Video,
-  Upload,
   Sun,
   Moon,
   LogOut,
@@ -15,23 +14,20 @@ import {
 } from "lucide-react";
 
 import { useTheme } from "../context/ThemeContext";
+import { useAthleteProfile } from "../context/AthleteProfileContext";
 
 
 function DashboardLayout({ children, onLogout }) {
 
   const { theme, toggleTheme } = useTheme();
+  const { hasAthleteProfile } = useAthleteProfile();
 
   const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
 
-  const navigation = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: LayoutDashboard,
-    },
+  const profileNavigation = [
     {
       name: "Athlete Profile",
       path: "/athlete-profile",
@@ -42,12 +38,20 @@ function DashboardLayout({ children, onLogout }) {
       path: "/my-videos",
       icon: Video,
     },
-    {
-      name: "Upload Video",
-      path: "/video-upload",
-      icon: Upload,
-    },
   ];
+
+  const navigation = hasAthleteProfile
+    ? [
+        {
+          name: "Dashboard",
+          path: "/dashboard",
+          icon: LayoutDashboard,
+        },
+        ...profileNavigation,
+      ]
+    : profileNavigation.filter(
+        (item) => item.path === "/athlete-profile"
+      );
 
 
   const closeSidebar = () => {
@@ -71,7 +75,13 @@ function DashboardLayout({ children, onLogout }) {
 
     if (onLogout) {
       onLogout();
+      return;
     }
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("token_type");
+
+    navigate("/login", { replace: true });
   };
 
 
@@ -226,18 +236,20 @@ function DashboardLayout({ children, onLogout }) {
 
           {/* Settings */}
 
-          <button
-            className="sidebar-action"
-            onClick={handleSettings}
-          >
+          {hasAthleteProfile && (
+            <button
+              className="sidebar-action"
+              onClick={handleSettings}
+            >
 
-            <Settings size={19} />
+              <Settings size={19} />
 
-            <span>
-              Settings
-            </span>
+              <span>
+                Settings
+              </span>
 
-          </button>
+            </button>
+          )}
 
 
           {/* Logout */}

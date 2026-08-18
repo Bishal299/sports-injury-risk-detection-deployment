@@ -3,6 +3,7 @@ import uuid
 import shutil
 from app.utils.video import extract_video_metadata
 from uuid import UUID
+from app.services.video_processing import extract_frames
 
 from fastapi import (
     APIRouter,
@@ -122,12 +123,46 @@ def upload_video(
     duration=metadata["duration"],
     fps=metadata["fps"],
     resolution=metadata["resolution"],
-    processing_status="uploaded"
+    processing_status="processing"
     )
 
     db.add(video)
     db.commit()
     db.refresh(video)
+
+    try:
+
+        frame_result = extract_frames(
+            video_path=file_path,
+            video_id=str(video.video_id),
+            frame_interval=5
+        )
+
+        print(
+            f"Frame extraction complete: "
+            f"{frame_result['saved_frames']} frames saved"
+        )
+
+        video.processing_status = "frames_extracted"
+
+        db.commit()
+        db.refresh(video)
+
+    except Exception as e:
+
+        print(
+            "Frame extraction failed:",
+            str(e)
+        )
+
+        video.processing_status = "processing_failed"
+
+        db.commit()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Video frame extraction failed"
+        )
 
     return video
 

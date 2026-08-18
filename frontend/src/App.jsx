@@ -16,6 +16,8 @@ import VideoUpload from "./pages/VideoUpload";
 import MyVideos from "./pages/MyVideos";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
+import ProfileCompleteRoute from "./components/ProfileCompleteRoute";
 
 
 function App() {
@@ -30,17 +32,29 @@ function App() {
 
           <Route
             path="/"
-            element={<Login />}
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
           />
 
           <Route
             path="/login"
-            element={<Login />}
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
           />
 
           <Route
             path="/register"
-            element={<Register />}
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
           />
 
           <Route
@@ -56,7 +70,9 @@ function App() {
             path="/video-upload"
             element={
               <ProtectedRoute>
-                <VideoUpload />
+                <ProfileCompleteRoute>
+                  <VideoUpload />
+                </ProfileCompleteRoute>
               </ProtectedRoute>
             }
           />
@@ -65,7 +81,9 @@ function App() {
             path="/my-videos"
             element={
               <ProtectedRoute>
-                <MyVideos />
+                <ProfileCompleteRoute>
+                  <MyVideos />
+                </ProfileCompleteRoute>
               </ProtectedRoute>
             }
           />
@@ -74,7 +92,9 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <ProfileCompleteRoute>
+                  <Dashboard />
+                </ProfileCompleteRoute>
               </ProtectedRoute>
             }
           />
@@ -82,7 +102,9 @@ function App() {
             path="/settings"
             element={
               <ProtectedRoute>
-                <Settings />
+                <ProfileCompleteRoute>
+                  <Settings />
+                </ProfileCompleteRoute>
               </ProtectedRoute>
             }
           />

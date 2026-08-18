@@ -15,12 +15,6 @@ function Dashboard() {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("token_type");
-
-    navigate("/login");
-  };
   useEffect(() => {
 
     const fetchUser = async () => {
@@ -86,7 +80,7 @@ function Dashboard() {
 
 
   return (
-  <DashboardLayout onLogout={handleLogout}>
+  <DashboardLayout>
 
     <div className="page-header">
 

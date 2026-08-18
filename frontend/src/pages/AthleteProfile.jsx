@@ -7,6 +7,7 @@ import {
   createAthleteProfile,
   updateAthleteProfile,
 } from "../services/api";
+import { useAthleteProfile } from "../context/AthleteProfileContext";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -16,6 +17,7 @@ import "../styles/athlete-profile.css";
 function AthleteProfile() {
 
   const navigate = useNavigate();
+  const { refreshProfileStatus } = useAthleteProfile();
 
   const [profileExists, setProfileExists] = useState(false);
 
@@ -26,10 +28,6 @@ function AthleteProfile() {
     height: "",
     weight: "",
     training_load: "",
-    flexibility: "",
-    strength: "",
-    balance: "",
-    endurance: "",
     coach_notes: "",
   });
 
@@ -58,10 +56,6 @@ function AthleteProfile() {
           height: data.height ?? "",
           weight: data.weight ?? "",
           training_load: data.training_load ?? "",
-          flexibility: data.flexibility ?? "",
-          strength: data.strength ?? "",
-          balance: data.balance ?? "",
-          endurance: data.endurance ?? "",
           coach_notes: data.coach_notes ?? "",
         });
 
@@ -113,6 +107,9 @@ function AthleteProfile() {
 
       setSaving(true);
 
+      const optionalNumber = (value) =>
+        value === "" ? null : Number(value);
+
       const profileData = {
 
         sport: formData.sport,
@@ -122,11 +119,7 @@ function AthleteProfile() {
         height: Number(formData.height),
         weight: Number(formData.weight),
 
-        training_load: Number(formData.training_load),
-        flexibility: Number(formData.flexibility),
-        strength: Number(formData.strength),
-        balance: Number(formData.balance),
-        endurance: Number(formData.endurance),
+        training_load: optionalNumber(formData.training_load),
 
         coach_notes: formData.coach_notes,
 
@@ -168,12 +161,10 @@ function AthleteProfile() {
         height: data.height ?? "",
         weight: data.weight ?? "",
         training_load: data.training_load ?? "",
-        flexibility: data.flexibility ?? "",
-        strength: data.strength ?? "",
-        balance: data.balance ?? "",
-        endurance: data.endurance ?? "",
         coach_notes: data.coach_notes ?? "",
       });
+
+      await refreshProfileStatus();
 
 
     } catch (error) {
@@ -451,7 +442,7 @@ function AthleteProfile() {
           </section>
 
 
-          {/* PERFORMANCE */}
+          {/* TRAINING CONTEXT */}
 
           <section className="profile-section">
 
@@ -464,11 +455,11 @@ function AthleteProfile() {
               <div>
 
                 <h2>
-                  Performance Metrics
+                  Training Context
                 </h2>
 
                 <p>
-                  Current physical performance indicators.
+                  Optional information about your current workload.
                 </p>
 
               </div>
@@ -476,12 +467,13 @@ function AthleteProfile() {
             </div>
 
 
-            <div className="form-grid form-grid-three">
+            <div className="form-grid">
 
               <div className="form-field">
 
                 <label htmlFor="training_load">
-                  Training Load
+                  Weekly Training Load
+                  <span>AU/week</span>
                 </label>
 
                 <input
@@ -491,86 +483,15 @@ function AthleteProfile() {
                   name="training_load"
                   value={formData.training_load}
                   onChange={handleChange}
-                  placeholder="0"
+                  placeholder="e.g. 1800"
                 />
+
+                <small>
+                  Add your last 7 days of session RPE (0–10) × training duration in minutes.
+                </small>
 
               </div>
 
-
-              <div className="form-field">
-
-                <label htmlFor="flexibility">
-                  Flexibility
-                </label>
-
-                <input
-                  id="flexibility"
-                  type="number"
-                  step="0.1"
-                  name="flexibility"
-                  value={formData.flexibility}
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-
-              </div>
-
-
-              <div className="form-field">
-
-                <label htmlFor="strength">
-                  Strength
-                </label>
-
-                <input
-                  id="strength"
-                  type="number"
-                  step="0.1"
-                  name="strength"
-                  value={formData.strength}
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-
-              </div>
-
-
-              <div className="form-field">
-
-                <label htmlFor="balance">
-                  Balance
-                </label>
-
-                <input
-                  id="balance"
-                  type="number"
-                  step="0.1"
-                  name="balance"
-                  value={formData.balance}
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-
-              </div>
-
-
-              <div className="form-field">
-
-                <label htmlFor="endurance">
-                  Endurance
-                </label>
-
-                <input
-                  id="endurance"
-                  type="number"
-                  step="0.1"
-                  name="endurance"
-                  value={formData.endurance}
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-
-              </div>
 
             </div>
 

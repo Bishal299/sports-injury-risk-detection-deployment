@@ -14,12 +14,14 @@ import {
   loginUser,
   loginWithGoogle
 } from "../services/api";
+import { useAthleteProfile } from "../context/AthleteProfileContext";
 import "../styles/auth.css";
 
 
 function Login() {
 
   const navigate = useNavigate();
+  const { refreshProfileStatus } = useAthleteProfile();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,6 +62,7 @@ function Login() {
         data.token_type
       );
 
+      await refreshProfileStatus();
       navigate("/dashboard");
 
     } catch (error) {
@@ -93,6 +96,7 @@ function Login() {
       data.token_type
     );
 
+    await refreshProfileStatus();
     navigate("/dashboard");
 
   } catch (error) {
