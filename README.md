@@ -6,7 +6,7 @@ An AI-based sports injury risk detection system that allows athletes to create p
 
 Frontend:
 
-[clickable Text Here](https://sports-injury-risk-detection-deployment-1.onrender.com)
+https://sports-injury-risk-detection-deployment-1.onrender.com
 
 Backend API:
 
