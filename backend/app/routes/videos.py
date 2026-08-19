@@ -4,6 +4,7 @@ import shutil
 from app.utils.video import extract_video_metadata
 from uuid import UUID
 from app.services.video_processing import extract_frames
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 from fastapi import (
     APIRouter,
@@ -119,7 +120,7 @@ def upload_video(
     video = Video(
     athlete_id=athlete.athlete_id,
     activity=activity,
-    video_url=f"/uploads/videos/{unique_filename}",
+    video_url = f"{BACKEND_URL}/uploads/videos/{filename}",
     duration=metadata["duration"],
     fps=metadata["fps"],
     resolution=metadata["resolution"],
