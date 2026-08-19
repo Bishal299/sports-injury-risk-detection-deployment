@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy import Column, String, Text, Float, Integer, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, func
 
 from app.database import Base
 
@@ -55,7 +56,7 @@ class Video(Base):
 
     uploaded_at = Column(
         DateTime,
-        server_default="CURRENT_TIMESTAMP"
+        server_default=func.current_timestamp()
     )
 
     athlete = relationship(
