@@ -8,14 +8,15 @@ from app.routes.videos import router as video_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import engine
+from app.database import engine, Base
 from app.models import User, UserRole, Athlete, InjuryHistory
+# from app.models import User, UserRole, Athlete, InjuryHistory
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
-
+Base.metadata.create_all(bind=engine)
 def get_cors_origins():
     configured_origins = os.getenv("BACKEND_CORS_ORIGINS")
 
