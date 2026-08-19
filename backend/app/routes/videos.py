@@ -120,7 +120,7 @@ def upload_video(
     video = Video(
     athlete_id=athlete.athlete_id,
     activity=activity,
-    video_url = f"{BACKEND_URL}/uploads/videos/{filename}",
+    video_url = f"{BACKEND_URL}/uploads/videos/{unique_filename}",
     duration=metadata["duration"],
     fps=metadata["fps"],
     resolution=metadata["resolution"],
@@ -131,39 +131,7 @@ def upload_video(
     db.commit()
     db.refresh(video)
 
-    # try:
-
-    #     frame_result = extract_frames(
-    #         video_path=file_path,
-    #         video_id=str(video.video_id),
-    #         frame_interval=5
-    #     )
-
-    #     print(
-    #         f"Frame extraction complete: "
-    #         f"{frame_result['saved_frames']} frames saved"
-    #     )
-
-    #     video.processing_status = "frames_extracted"
-
-    #     db.commit()
-    #     db.refresh(video)
-
-    # except Exception as e:
-
-    #     print(
-    #         "Frame extraction failed:",
-    #         str(e)
-    #     )
-
-    #     video.processing_status = "processing_failed"
-
-    #     db.commit()
-
-    #     raise HTTPException(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         detail="Video frame extraction failed"
-    #     )
+    
 
     return video
 
