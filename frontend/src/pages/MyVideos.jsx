@@ -4,7 +4,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 import {
   getMyVideos,
-  deleteVideo
+  deleteVideo,
+  analyzeVideo
 } from "../services/api";
 
 import "../styles/my-videos.css";
@@ -16,7 +17,7 @@ function MyVideos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
-
+  const [analyzingId, setAnalyzingId] = useState(null);
   const navigate = useNavigate();
 
 
@@ -49,7 +50,35 @@ function MyVideos() {
     loadVideos();
 
   }, []);
+  
+  const handleAnalysis = async (videoId) => {
+  try {
+    setAnalyzingId(videoId);
+    setError("");
 
+    await analyzeVideo(videoId);
+
+    setVideos((currentVideos) =>
+      currentVideos.map((video) =>
+        video.video_id === videoId
+          ? {
+              ...video,
+              processing_status: "frames_extracted"
+            }
+          : video
+      )
+    );
+
+  } catch (error) {
+
+    setError(error.message);
+
+  } finally {
+
+    setAnalyzingId(null);
+
+  }
+};
 
   // -----------------------------
   // Delete Video
@@ -386,45 +415,43 @@ function MyVideos() {
                       </div>
 
 
-                    </div>
-
+                   </div>
+                  </div>
 
                     {/* Actions */}
 
+             {/* Actions */}
+
                     <div className="video-actions">
 
+                      <button
+                        className="primary-button"
+                        onClick={() => handleAnalysis(video.video_id)}
+                        disabled={analyzingId === video.video_id}
+                      >
+                        {analyzingId === video.video_id
+                          ? "Analyzing..."
+                          : "Analysis"}
+                      </button>
 
                       <button
                         className="secondary-button"
-                        onClick={() =>
-                          navigate("/video-upload")
-                        }
+                        onClick={() => navigate("/video-upload")}
                       >
                         Upload Another
                       </button>
 
-
                       <button
                         className="delete-button"
-                        onClick={() =>
-                          handleDelete(video.video_id)
-                        }
-                        disabled={
-                          deletingId === video.video_id
-                        }
+                        onClick={() => handleDelete(video.video_id)}
+                        disabled={deletingId === video.video_id}
                       >
-
                         {deletingId === video.video_id
                           ? "Deleting..."
                           : "Delete"}
-
                       </button>
 
-
                     </div>
-
-
-                  </div>
 
                 </article>
 

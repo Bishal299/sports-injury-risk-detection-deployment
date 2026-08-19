@@ -2,6 +2,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { BrowserRouter } from "react-router-dom";
 import "./styles/global.css";
 import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";

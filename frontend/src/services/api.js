@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 
 export async function registerUser(userData) {
@@ -292,4 +293,32 @@ export async function deleteVideo(videoId) {
   }
 
   return true;
+}
+
+export async function analyzeVideo(videoId) {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/videos/${videoId}/analyze`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || "Video analysis failed"
+    );
+  }
+
+  return data;
 }

@@ -11,9 +11,32 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine
 from app.models import User, UserRole, Athlete, InjuryHistory
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
+
+def get_cors_origins():
+    configured_origins = os.getenv("BACKEND_CORS_ORIGINS")
+
+    if configured_origins:
+        return [
+            origin.strip()
+            for origin in configured_origins.split(",")
+            if origin.strip()
+        ]
+
+    return [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5175",
+        "http://127.0.0.1:5175",
+    ]
+
+
+os.makedirs("uploads", exist_ok=True)
+os.makedirs("uploads/videos", exist_ok=True)
+os.makedirs("uploads/frames", exist_ok=True)
 
 
 app = FastAPI(
@@ -23,12 +46,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
 
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
-    ],
+    allow_origins=get_cors_origins(),
 
     allow_credentials=True,
 

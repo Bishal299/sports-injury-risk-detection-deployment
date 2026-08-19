@@ -123,46 +123,46 @@ def upload_video(
     duration=metadata["duration"],
     fps=metadata["fps"],
     resolution=metadata["resolution"],
-    processing_status="processing"
+    processing_status="uploaded"
     )
 
     db.add(video)
     db.commit()
     db.refresh(video)
 
-    try:
+    # try:
 
-        frame_result = extract_frames(
-            video_path=file_path,
-            video_id=str(video.video_id),
-            frame_interval=5
-        )
+    #     frame_result = extract_frames(
+    #         video_path=file_path,
+    #         video_id=str(video.video_id),
+    #         frame_interval=5
+    #     )
 
-        print(
-            f"Frame extraction complete: "
-            f"{frame_result['saved_frames']} frames saved"
-        )
+    #     print(
+    #         f"Frame extraction complete: "
+    #         f"{frame_result['saved_frames']} frames saved"
+    #     )
 
-        video.processing_status = "frames_extracted"
+    #     video.processing_status = "frames_extracted"
 
-        db.commit()
-        db.refresh(video)
+    #     db.commit()
+    #     db.refresh(video)
 
-    except Exception as e:
+    # except Exception as e:
 
-        print(
-            "Frame extraction failed:",
-            str(e)
-        )
+    #     print(
+    #         "Frame extraction failed:",
+    #         str(e)
+    #     )
 
-        video.processing_status = "processing_failed"
+    #     video.processing_status = "processing_failed"
 
-        db.commit()
+    #     db.commit()
 
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Video frame extraction failed"
-        )
+    #     raise HTTPException(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         detail="Video frame extraction failed"
+    #     )
 
     return video
 
@@ -243,6 +243,104 @@ def get_video(
         )
 
     return video
+
+@router.post(
+    "/{video_id}/analyze"
+)
+def analyze_video(
+    video_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # 1. Find athlete profile
+    athlete = (
+        db.query(Athlete)
+        .filter(
+            Athlete.user_id == current_user.user_id
+        )
+        .first()
+    )
+
+    if not athlete:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Athlete profile not found"
+        )
+
+    # 2. Find video belonging to this athlete
+    video = (
+        db.query(Video)
+        .filter(
+            Video.video_id == video_id,
+            Video.athlete_id == athlete.athlete_id
+        )
+        .first()
+    )
+
+    if not video:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Video not found"
+        )
+
+    # 3. Get actual video file
+    filename = os.path.basename(video.video_url)
+
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        filename
+    )
+
+    if not os.path.exists(file_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Video file not found"
+        )
+
+    # 4. Update status
+    video.processing_status = "processing"
+    db.commit()
+
+    # 5. Extract frames
+    try:
+
+        frame_result = extract_frames(
+            video_path=file_path,
+            video_id=str(video.video_id),
+            frame_interval=5
+        )
+
+        print(
+            f"Frame extraction complete: "
+            f"{frame_result['saved_frames']} frames saved"
+        )
+
+        video.processing_status = "frames_extracted"
+
+        db.commit()
+        db.refresh(video)
+
+    except Exception as e:
+
+        print(
+            "Frame extraction failed:",
+            str(e)
+        )
+
+        video.processing_status = "processing_failed"
+
+        db.commit()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Video frame extraction failed"
+        )
+
+    return {
+        "message": "Video analysis started",
+        "video_id": str(video.video_id),
+        "status": video.processing_status
+    }
 
 @router.delete(
     "/{video_id}",

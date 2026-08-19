@@ -16,6 +16,7 @@ mvenv/
 backend/venv/
 backend/.venv/
 backend/mvenv/
+backend/myvenv/
 
 
 node_modules/

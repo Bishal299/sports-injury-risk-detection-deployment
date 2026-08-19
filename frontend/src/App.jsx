@@ -10,6 +10,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import AthleteProfile from "./pages/AthleteProfile";
 import VideoUpload from "./pages/VideoUpload";
@@ -32,11 +33,7 @@ function App() {
 
           <Route
             path="/"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
+            element={<Landing />}
           />
 
           <Route
