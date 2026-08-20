@@ -3,7 +3,7 @@ from app.services.pose_detector import PoseDetector
 from app.services.landmark_extractor import extract_landmarks
 
 
-VIDEO_PATH = r"C:\Sports_injury_detection\sports-injury-risk-detection\backend\uploads\videos\b36254b2-6ae9-47b4-89b3-b0b64059cfa9.mp4"
+VIDEO_PATH = r"C:\Sports_injury_detection\sports-injury-risk-detection\backend\uploads\videos\5b9e8da3-bc62-4774-b9da-6a613036e181.mp4"
 MODEL_PATH = "models/pose_landmarker_lite.task"
 
 

@@ -99,15 +99,56 @@ Users and athlete profiles are connected using user IDs, while uploaded videos a
 
 ## 💻 Run Locally
 
-### 1. Clone the Repository
+### 1. Run with Docker (Recommended)
 
-```bash
-git clone <your-github-repository-url>
-cd sports-injury-risk-detection
+The easiest way to start the complete stack (PostgreSQL + FastAPI + React/Nginx) is using Docker Compose:
 
-## Backend
+1. **Clone the repository:**
+   ```bash
+   git clone <your-github-repository-url>
+   cd sports-injury-risk-detection
+   ```
 
-Go to the backend directory:
+2. **Configure environment variables (optional):**
+   ```bash
+   cp .env.example .env
+   ```
 
+3. **Start all services with Docker Compose:**
+   ```bash
+   docker compose up --build -d
+   ```
+
+4. **Access the application:**
+   - **Frontend App:** [http://localhost:3000](http://localhost:3000)
+   - **Backend API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+   - **Health Check:** [http://localhost:8000/](http://localhost:8000/)
+
+5. **Stop services:**
+   ```bash
+   docker compose down
+   ```
+
+---
+
+### 2. Run Manually (Without Docker)
+
+#### Backend Setup
 ```bash
 cd backend
+python -m venv venv
+# On Windows:
+.\venv\Scripts\activate
+# On Linux/macOS:
+source venv/bin/activate
+
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+#### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
