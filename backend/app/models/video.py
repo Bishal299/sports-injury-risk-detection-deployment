@@ -63,3 +63,10 @@ class Video(Base):
         "Athlete",
         back_populates="videos"
     )
+
+    analysis = relationship(
+        "AnalysisResult",
+        back_populates="video",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )

@@ -86,3 +86,9 @@ class Athlete(Base):
         back_populates="athlete",
         cascade="all, delete"
     )
+
+    analyses = relationship(
+        "AnalysisResult",
+        back_populates="athlete",
+        cascade="all, delete"
+    )

@@ -155,7 +155,7 @@ function Landing() {
               support safer training decisions.
             </p>
 
-            <div className="landing-hero-actions">
+            {/* <div className="landing-hero-actions">
               <Link
                 to="/register"
                 className="landing-button landing-button-primary landing-button-large"
@@ -171,7 +171,7 @@ function Landing() {
                 <Play size={17} />
                 Login
               </Link>
-            </div>
+            </div> */}
 
             <div className="landing-proof-row">
               <span>

@@ -322,3 +322,150 @@ export async function analyzeVideo(videoId) {
 
   return data;
 }
+
+export async function getVideoDetails(videoId) {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/videos/${videoId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || "Failed to fetch video details"
+    );
+  }
+
+  return data;
+}
+
+export async function triggerMovementAnalysis(videoId) {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/analysis/${videoId}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || "Failed to start movement analysis"
+    );
+  }
+
+  return data;
+}
+
+export async function getMovementAnalysisStatus(videoId) {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/analysis/${videoId}/status`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || "Failed to fetch analysis status"
+    );
+  }
+
+  return data;
+}
+
+export async function getMovementAnalysisResult(videoId) {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/analysis/${videoId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || "Failed to fetch analysis results"
+    );
+  }
+
+  return data;
+}
+
+export async function downloadReportFile(videoId, fileType = "csv") {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const endpoint = `${API_BASE_URL}/analysis/${videoId}/${fileType}`;
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    let errMessage = "Download failed";
+    try {
+      const err = await response.json();
+      errMessage = err.detail || errMessage;
+    } catch {}
+    throw new Error(errMessage);
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `movement_analysis_${videoId}.${fileType}`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}

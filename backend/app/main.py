@@ -5,12 +5,12 @@ from app.routes.athletes import router as athlete_router
 from app.routes.auth import router as auth_router
 from app.routes.injury import router as injury_router
 from app.routes.videos import router as video_router
+from app.routes.analysis import router as analysis_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base
-from app.models import User, UserRole, Athlete, InjuryHistory
-# from app.models import User, UserRole, Athlete, InjuryHistory
+from app.models import User, UserRole, Athlete, InjuryHistory, Video, AnalysisResult
 from dotenv import load_dotenv
 import os
 
@@ -38,6 +38,9 @@ def get_cors_origins():
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("uploads/videos", exist_ok=True)
 os.makedirs("uploads/frames", exist_ok=True)
+os.makedirs("uploads/analysis", exist_ok=True)
+os.makedirs("uploads/analysis/skeleton", exist_ok=True)
+os.makedirs("uploads/analysis/reports", exist_ok=True)
 
 
 app = FastAPI(
@@ -68,6 +71,8 @@ app.include_router(user_router)
 app.include_router(athlete_router)
 app.include_router(injury_router)
 app.include_router(video_router)
+app.include_router(analysis_router)
+
 
 
 @app.get("/")

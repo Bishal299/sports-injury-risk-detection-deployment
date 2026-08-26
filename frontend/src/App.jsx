@@ -16,6 +16,7 @@ import AthleteProfile from "./pages/AthleteProfile";
 import VideoUpload from "./pages/VideoUpload";
 import MyVideos from "./pages/MyVideos";
 import Settings from "./pages/Settings";
+import Analysis from "./pages/Analysis";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import ProfileCompleteRoute from "./components/ProfileCompleteRoute";
@@ -86,6 +87,17 @@ function App() {
           />
 
           <Route
+            path="/analysis/:videoId"
+            element={
+              <ProtectedRoute>
+                <ProfileCompleteRoute>
+                  <Analysis />
+                </ProfileCompleteRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
@@ -95,6 +107,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/settings"
             element={

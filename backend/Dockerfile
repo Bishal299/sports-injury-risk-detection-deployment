@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system dependencies required for OpenCV, MediaPipe, and health checks
+# Install system dependencies required for OpenCV, MediaPipe, ffmpeg and health checks
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender1 \
     curl \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user and group for security
@@ -29,8 +30,9 @@ COPY app ./app
 COPY models ./models
 
 # Create persistent storage directories and assign ownership to non-root user
-RUN mkdir -p uploads/videos uploads/frames && \
+RUN mkdir -p uploads/videos uploads/frames uploads/analysis/skeleton uploads/analysis/reports && \
     chown -R appuser:appuser /app
+
 
 # Switch to non-root user
 USER appuser
