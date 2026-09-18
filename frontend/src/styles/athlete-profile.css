@@ -312,6 +312,7 @@
 ========================================= */
 
 .form-field input,
+.form-field select,
 .form-field textarea {
   width: 100%;
 
@@ -334,7 +335,8 @@
     background var(--transition);
 }
 
-.form-field input {
+.form-field input,
+.form-field select {
   height: 44px;
 }
 
@@ -352,11 +354,13 @@
 }
 
 .form-field input:hover,
+.form-field select:hover,
 .form-field textarea:hover {
   border-color: var(--text-muted);
 }
 
 .form-field input:focus,
+.form-field select:focus,
 .form-field textarea:focus {
   border-color: var(--accent);
 
@@ -602,4 +606,112 @@
     animation-duration: 1.5s;
   }
 
+}
+
+
+/* =========================================
+   INJURY HISTORY
+========================================= */
+
+.section-heading-actions {
+  align-items: flex-start;
+}
+
+.section-heading-actions > div:nth-child(2) {
+  flex: 1;
+}
+
+.compact-button {
+  min-height: 38px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.injury-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+
+  padding: 18px;
+
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+
+  font-size: 0.9rem;
+}
+
+.injury-empty-state strong {
+  color: var(--text-primary);
+}
+
+.injury-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.injury-table {
+  width: 100%;
+  min-width: 760px;
+
+  border-collapse: collapse;
+
+  font-size: 0.88rem;
+}
+
+.injury-table th,
+.injury-table td {
+  padding: 12px 10px;
+
+  border-bottom: 1px solid var(--border-color);
+
+  text-align: left;
+  vertical-align: middle;
+}
+
+.injury-table th {
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.injury-table td {
+  color: var(--text-primary);
+}
+
+.injury-row-actions,
+.injury-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-action-button {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 0.78rem;
+}
+
+.danger-button {
+  color: var(--danger);
+}
+
+.danger-button:hover {
+  border-color: var(--danger);
+}
+
+.injury-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  margin-top: 18px;
+  padding-top: 18px;
+
+  border-top: 1px solid var(--border-color);
 }

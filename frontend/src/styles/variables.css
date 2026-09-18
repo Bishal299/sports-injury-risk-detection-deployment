@@ -1,4 +1,6 @@
 :root {
+  color-scheme: light;
+
   --bg-primary: #f5f7fb;
   --bg-secondary: #ffffff;
   --bg-tertiary: #eef1f6;
@@ -29,11 +31,14 @@
   --radius-md: 12px;
   --radius-lg: 18px;
 
-  --transition: 0.2s ease;
+  --transition: 0.28s ease;
+  --theme-transition: 0.32s ease;
 }
 
 
 [data-theme="dark"] {
+  color-scheme: dark;
+
   --bg-primary: #0b1120;
   --bg-secondary: #111827;
   --bg-tertiary: #1f2937;

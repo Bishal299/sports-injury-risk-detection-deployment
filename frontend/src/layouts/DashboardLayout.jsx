@@ -1,10 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import {
   LayoutDashboard,
   UserRound,
   Video,
+  History,
+  ClipboardList,
+  BriefcaseBusiness,
+  ShieldCheck,
+  Activity,
+  BarChart3,
+  FileText,
+  UsersRound,
   Sun,
   Moon,
   LogOut,
@@ -14,17 +22,90 @@ import {
 } from "lucide-react";
 
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import { useAthleteProfile } from "../context/AthleteProfileContext";
+import { getAnalysisHistory, getCurrentUser } from "../services/api";
+import { clearAuthSession } from "../utils/authSession";
+import { confirmLogout } from "../utils/logoutConfirmation";
+import NotificationBell from "../components/notifications/NotificationBell";
+import BrandLogo from "../components/BrandLogo";
 
 
 function DashboardLayout({ children, onLogout }) {
-
+  const { logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { hasAthleteProfile } = useAthleteProfile();
-
+  const [hasAnalysisHistory, setHasAnalysisHistory] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCurrentUser = async () => {
+      try {
+        const user = await getCurrentUser();
+
+        if (!cancelled) {
+          setCurrentUser(user);
+        }
+      } catch {
+        if (!cancelled) {
+          setCurrentUser(null);
+        }
+      }
+    };
+
+    loadCurrentUser();
+    window.addEventListener("user-role-updated", loadCurrentUser);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("user-role-updated", loadCurrentUser);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    if (!hasAthleteProfile) {
+      setHasAnalysisHistory(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const refreshAnalysisHistoryVisibility = async () => {
+      try {
+        const records = await getAnalysisHistory();
+        const hasRecords = Array.isArray(records) && records.length > 0;
+
+        if (!cancelled) {
+          setHasAnalysisHistory(hasRecords);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setHasAnalysisHistory(false);
+        }
+      }
+    };
+
+    refreshAnalysisHistoryVisibility();
+    window.addEventListener(
+      "analysis-history-updated",
+      refreshAnalysisHistoryVisibility
+    );
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener(
+        "analysis-history-updated",
+        refreshAnalysisHistoryVisibility
+      );
+    };
+  }, [hasAthleteProfile]);
 
 
   const profileNavigation = [
@@ -33,11 +114,23 @@ function DashboardLayout({ children, onLogout }) {
       path: "/athlete-profile",
       icon: UserRound,
     },
-    {
-      name: "My Videos",
-      path: "/my-videos",
-      icon: Video,
-    },
+        {
+          name: "My Videos",
+          path: "/my-videos",
+          icon: Video,
+        },
+        ...(hasAnalysisHistory
+          ? [{
+              name: "Analysis History",
+              path: "/analysis-history",
+              icon: History,
+            }]
+          : []),
+        {
+          name: "My Work",
+          path: "/my-work",
+          icon: ClipboardList,
+        },
   ];
 
   const navigation = hasAthleteProfile
@@ -52,6 +145,81 @@ function DashboardLayout({ children, onLogout }) {
     : profileNavigation.filter(
         (item) => item.path === "/athlete-profile"
       );
+
+  const professionalNavigation = [
+    {
+      name: currentUser?.role === "Coach"
+        ? "Coach Access"
+        : "Request Professional Role",
+      path: "/request-professional-role",
+      icon: BriefcaseBusiness,
+    },
+    ...(currentUser?.role === "Administrator"
+      ? [
+          {
+            name: "Professional Requests",
+            path: "/admin/professional-requests",
+            icon: ShieldCheck,
+          },
+        ]
+      : []),
+  ];
+
+  const fullNavigation = currentUser?.role === "Administrator"
+    ? [
+        {
+          name: "Dashboard",
+          path: "/admin/dashboard",
+          icon: LayoutDashboard,
+        },
+        {
+          name: "Professional Requests",
+          path: "/admin/professional-requests",
+          icon: ShieldCheck,
+        },
+        {
+          name: "User Management",
+          path: "/admin/users",
+          icon: UsersRound,
+        },
+        {
+          name: "Platform Analytics",
+          path: "/admin/analytics",
+          icon: BarChart3,
+        },
+        {
+          name: "System Monitoring",
+          path: "/admin/system-monitoring",
+          icon: Activity,
+        },
+        {
+          name: "Report Management",
+          path: "/admin/reports",
+          icon: FileText,
+        },
+        {
+          name: "Profile",
+          path: "/admin/profile",
+          icon: UserRound,
+        },
+        {
+          name: "Settings",
+          path: "/admin/settings",
+          icon: Settings,
+        },
+      ]
+    : currentUser?.role === "Coach"
+      ? [
+          {
+            name: "Coach Access",
+            path: "/coach/dashboard",
+            icon: BriefcaseBusiness,
+          },
+        ]
+      : [
+          ...navigation,
+          ...professionalNavigation,
+        ];
 
 
   const closeSidebar = () => {
@@ -70,19 +238,23 @@ function DashboardLayout({ children, onLogout }) {
   };
 
 
-  const handleLogout = () => {
-    closeSidebar();
-
-    if (onLogout) {
-      onLogout();
+  const handleLogout = async () => {
+    if (!confirmLogout()) {
       return;
     }
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("token_type");
+    closeSidebar();
+
+    if (onLogout) {
+      await onLogout();
+      return;
+    }
+
+    await logout();
 
     navigate("/login", { replace: true });
   };
+
 
 
   return (
@@ -104,16 +276,7 @@ function DashboardLayout({ children, onLogout }) {
 
 
         <div className="mobile-logo">
-
-          <div className="logo-icon">
-            S
-          </div>
-
-          <div>
-            <h2>SportRisk</h2>
-            <span>Injury Detection</span>
-          </div>
-
+          <BrandLogo />
         </div>
 
       </header>
@@ -142,15 +305,7 @@ function DashboardLayout({ children, onLogout }) {
         {/* Sidebar Logo */}
 
         <div className="sidebar-logo">
-
-          <div className="logo-icon">
-            S
-          </div>
-
-          <div>
-            <h2>SportRisk</h2>
-            <span>Injury Detection</span>
-          </div>
+          <BrandLogo />
 
 
           {/* Close button - mobile only */}
@@ -170,7 +325,7 @@ function DashboardLayout({ children, onLogout }) {
 
         <nav className="sidebar-nav">
 
-          {navigation.map((item) => {
+          {fullNavigation.map((item) => {
 
             const Icon = item.icon;
 
@@ -236,7 +391,7 @@ function DashboardLayout({ children, onLogout }) {
 
           {/* Settings */}
 
-          {hasAthleteProfile && (
+          {currentUser?.role === "Athlete" && hasAthleteProfile && (
             <button
               className="sidebar-action"
               onClick={handleSettings}
@@ -276,6 +431,9 @@ function DashboardLayout({ children, onLogout }) {
       {/* Main Content */}
 
       <main className="dashboard-main">
+        <div className="notification-layout-slot">
+          <NotificationBell />
+        </div>
 
         {children}
 

@@ -28,6 +28,11 @@
   min-width: max-content;
 }
 
+.landing-brand-logo-image {
+  width: 190px;
+  max-height: 58px;
+}
+
 .landing-logo-icon {
   width: 42px;
   height: 42px;

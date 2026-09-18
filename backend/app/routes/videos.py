@@ -23,6 +23,7 @@ from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.models.athlete import Athlete
 from app.models.video import Video
+from app.models.analysis_result import AnalysisResult
 from app.schemas.video import VideoRead
 
 
@@ -252,6 +253,21 @@ def analyze_video(
             detail="Video not found"
         )
 
+    active_analysis = (
+        db.query(AnalysisResult)
+        .filter(
+            AnalysisResult.athlete_id == athlete.athlete_id,
+            AnalysisResult.status == "processing",
+            AnalysisResult.video_id != video.video_id,
+        )
+        .first()
+    )
+    if active_analysis:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Another video analysis is already running. Please wait for it to finish before starting a new one.",
+        )
+
     # 3. Get actual video file
     filename = os.path.basename(video.video_url)
 
@@ -311,6 +327,67 @@ def analyze_video(
         "status": video.processing_status
     }
 
+def _cleanup_video_storage(video_id: UUID, video_url: str | None):
+    """
+    Purges all physical storage artifacts for a deleted video:
+    - Original uploaded video file
+    - Extracted video frames directory
+    - Rendered skeleton visualizer video files
+    - Generated CSV & PDF report files
+    """
+    str_id = str(video_id)
+
+    # 1. Source video file
+    if video_url:
+        filename = os.path.basename(video_url)
+        candidates = [
+            os.path.join(UPLOAD_DIR, filename),
+            os.path.join("uploads", "videos", filename),
+        ]
+        for c in candidates:
+            if os.path.isfile(c):
+                try:
+                    os.remove(c)
+                except OSError:
+                    pass
+
+    # 2. Extracted frames folder
+    frames_dir = os.path.join("uploads", "frames", str_id)
+    if os.path.exists(frames_dir):
+        try:
+            shutil.rmtree(frames_dir, ignore_errors=True)
+        except Exception:
+            pass
+
+    # 3. Skeleton visualizer files
+    skel_dir = os.path.join("uploads", "analysis", "skeleton")
+    if os.path.exists(skel_dir):
+        for fname in os.listdir(skel_dir):
+            if fname.startswith(str_id):
+                fpath = os.path.join(skel_dir, fname)
+                try:
+                    if os.path.isfile(fpath):
+                        os.remove(fpath)
+                    elif os.path.isdir(fpath):
+                        shutil.rmtree(fpath, ignore_errors=True)
+                except Exception:
+                    pass
+
+    # 4. CSV & PDF report files
+    reports_dir = os.path.join("uploads", "analysis", "reports")
+    if os.path.exists(reports_dir):
+        for fname in os.listdir(reports_dir):
+            if fname.startswith(str_id):
+                fpath = os.path.join(reports_dir, fname)
+                try:
+                    if os.path.isfile(fpath):
+                        os.remove(fpath)
+                    elif os.path.isdir(fpath):
+                        shutil.rmtree(fpath, ignore_errors=True)
+                except Exception:
+                    pass
+
+
 @router.delete(
     "/{video_id}",
     status_code=status.HTTP_204_NO_CONTENT
@@ -351,19 +428,10 @@ def delete_video(
             detail="Video not found"
         )
 
-    # 3. Delete physical video file
-    if video.video_url:
-        filename = os.path.basename(video.video_url)
+    # 3. Clean up physical files from storage in background
+    _cleanup_video_storage(video.video_id, video.video_url)
 
-        file_path = os.path.join(
-            UPLOAD_DIR,
-            filename
-        )
-
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-    # 4. Delete database record
+    # 4. Delete database record (cascades to analysis_results)
     db.delete(video)
     db.commit()
 

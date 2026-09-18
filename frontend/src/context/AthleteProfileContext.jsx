@@ -7,25 +7,21 @@ import React, {
 } from "react";
 
 import { getAthleteProfile } from "../services/api";
-
+import { useAuth } from "./AuthContext";
 
 const AthleteProfileContext = createContext();
 
-
 export function AthleteProfileProvider({ children }) {
-
+  const { user, isAuthenticated } = useAuth();
   const [hasAthleteProfile, setHasAthleteProfile] = useState(null);
-  const [loadingProfileStatus, setLoadingProfileStatus] = useState(true);
+  const [loadingProfileStatus, setLoadingProfileStatus] = useState(false);
   const [profileStatusError, setProfileStatusError] = useState("");
 
   const refreshProfileStatus = useCallback(async () => {
-
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
+    if (!isAuthenticated || user?.role !== "Athlete") {
       setHasAthleteProfile(null);
-      setProfileStatusError("");
       setLoadingProfileStatus(false);
+      setProfileStatusError("");
       return;
     }
 
@@ -38,6 +34,12 @@ export function AthleteProfileProvider({ children }) {
     } catch (error) {
       if (error.message === "Athlete profile not found") {
         setHasAthleteProfile(false);
+      } else if (
+        error.message === "Not authenticated" ||
+        error.message?.includes("expired")
+      ) {
+        setHasAthleteProfile(null);
+        setProfileStatusError("");
       } else {
         setHasAthleteProfile(null);
         setProfileStatusError(error.message);
@@ -45,12 +47,17 @@ export function AthleteProfileProvider({ children }) {
     } finally {
       setLoadingProfileStatus(false);
     }
-
-  }, []);
+  }, [isAuthenticated, user?.role]);
 
   useEffect(() => {
-    refreshProfileStatus();
-  }, [refreshProfileStatus]);
+    if (isAuthenticated && user?.role === "Athlete") {
+      refreshProfileStatus();
+    } else {
+      setHasAthleteProfile(null);
+      setLoadingProfileStatus(false);
+      setProfileStatusError("");
+    }
+  }, [isAuthenticated, user?.role, refreshProfileStatus]);
 
   return (
     <AthleteProfileContext.Provider
@@ -65,7 +72,6 @@ export function AthleteProfileProvider({ children }) {
     </AthleteProfileContext.Provider>
   );
 }
-
 
 export function useAthleteProfile() {
   return useContext(AthleteProfileContext);

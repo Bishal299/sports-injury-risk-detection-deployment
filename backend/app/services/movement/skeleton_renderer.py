@@ -1,7 +1,6 @@
 import os
 import cv2
-import numpy as np
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import subprocess
 import shutil
 
@@ -172,4 +171,3 @@ def render_skeleton_video(
         except Exception as e:
             print("Fallback move error:", str(e))
     return output_video_path
-

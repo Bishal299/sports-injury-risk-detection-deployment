@@ -414,6 +414,11 @@
   background: var(--bg-card);
 }
 
+.selected-videos-list {
+  display: grid;
+  gap: 10px;
+}
+
 .selected-video-info {
   display: flex;
 
@@ -844,4 +849,19 @@
     grid-column: auto;
   }
 
+}
+
+.upload-progress-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--success-border);
+}
+
+.upload-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--success);
+  transition: width 0.25s ease;
 }

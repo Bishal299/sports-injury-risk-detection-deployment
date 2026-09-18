@@ -91,4 +91,34 @@ class Athlete(Base):
         "AnalysisResult",
         back_populates="athlete",
         cascade="all, delete"
-    )
+    )
+
+    coach_relationships = relationship(
+        "CoachAthleteRelationship",
+        back_populates="athlete",
+        cascade="all, delete"
+    )
+
+    professional_relationships = relationship(
+        "ProfessionalAthleteRelationship",
+        back_populates="athlete",
+        cascade="all, delete"
+    )
+
+    rehabilitation_plans = relationship(
+        "RehabilitationPlan",
+        back_populates="athlete",
+        cascade="all, delete-orphan"
+    )
+
+    physiotherapist_notes = relationship(
+        "PhysiotherapistNote",
+        back_populates="athlete",
+        cascade="all, delete-orphan"
+    )
+
+    coach_tasks = relationship(
+        "CoachTask",
+        back_populates="athlete",
+        cascade="all, delete-orphan"
+    )

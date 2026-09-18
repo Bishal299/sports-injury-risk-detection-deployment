@@ -22,6 +22,9 @@ export function ThemeProvider({ children }) {
 
 
   useEffect(() => {
+    document.documentElement.classList.add(
+      "theme-transitioning"
+    );
 
     document.documentElement.setAttribute(
       "data-theme",
@@ -32,6 +35,19 @@ export function ThemeProvider({ children }) {
       "theme",
       theme
     );
+
+    const transitionTimer = window.setTimeout(() => {
+      document.documentElement.classList.remove(
+        "theme-transitioning"
+      );
+    }, 360);
+
+    return () => {
+      window.clearTimeout(transitionTimer);
+      document.documentElement.classList.remove(
+        "theme-transitioning"
+      );
+    };
 
   }, [theme]);
 

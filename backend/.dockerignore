@@ -7,6 +7,7 @@ env/
 venv/
 .venv/
 myvenv/
+storage/
 pip-log.txt
 pip-delete-this-directory.txt
 .env
@@ -16,6 +17,13 @@ pip-delete-this-directory.txt
 .gitignore
 .dockerignore
 uploads/
+app/uploads/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.pdf
+*.csv
 tests/
 test_*.py
 .pytest_cache/

@@ -1,27 +1,34 @@
 import React from "react";
-import { Navigate, useNavigationType } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
+import { useAuth } from "../context/AuthContext";
+import { getDefaultRouteForRole } from "../utils/roleRoutes";
 
 function PublicRoute({ children }) {
+  const { user, isAuthenticated, isLoading } = useAuth();
 
-  const token = localStorage.getItem("access_token");
-  const navigationType = useNavigationType();
-
-  // Going back from a protected screen to Login is treated as a logout.
-  // This ensures the browser cannot move forward into a protected route.
-  if (token && navigationType === "POP") {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("token_type");
-
-    return children;
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "50vh",
+          color: "var(--text-secondary, #6b7280)",
+          fontSize: "0.95rem",
+        }}
+      >
+        Loading...
+      </div>
+    );
   }
 
-  if (token) {
-    return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated && user?.role) {
+    return <Navigate to={getDefaultRouteForRole(user.role)} replace />;
   }
 
   return children;
 }
-
 
 export default PublicRoute;

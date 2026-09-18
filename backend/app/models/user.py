@@ -67,5 +67,58 @@ class User(Base):
     athlete = relationship(
         "Athlete",
         back_populates="user",
-        uselist=False
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
+
+    coach_profile = relationship(
+        "CoachProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
+
+    professional_profiles = relationship(
+        "ProfessionalProfile",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    professional_role_requests = relationship(
+        "ProfessionalRoleRequest",
+        foreign_keys="ProfessionalRoleRequest.user_id",
+        back_populates="user",
+        cascade="all, delete"
+    )
+
+    reviewed_professional_role_requests = relationship(
+        "ProfessionalRoleRequest",
+        foreign_keys="ProfessionalRoleRequest.reviewed_by",
+        back_populates="reviewer"
+    )
+
+    requested_coach_athlete_relationships = relationship(
+        "CoachAthleteRelationship",
+        foreign_keys="CoachAthleteRelationship.requested_by",
+        back_populates="requester"
+    )
+
+    professional_athlete_relationships = relationship(
+        "ProfessionalAthleteRelationship",
+        foreign_keys="ProfessionalAthleteRelationship.professional_user_id",
+        back_populates="professional_user",
+        cascade="all, delete"
+    )
+
+    requested_professional_athlete_relationships = relationship(
+        "ProfessionalAthleteRelationship",
+        foreign_keys="ProfessionalAthleteRelationship.requested_by",
+        back_populates="requester"
+    )
+
+    notifications = relationship(
+        "Notification",
+        foreign_keys="Notification.recipient_user_id",
+        back_populates="recipient",
+        cascade="all, delete-orphan"
     )

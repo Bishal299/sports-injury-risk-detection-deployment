@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { registerUser } from "../services/api";
+import BrandLogo from "../components/BrandLogo";
 import "../styles/auth.css";
 
 
@@ -53,8 +54,8 @@ function Register() {
       setLoading(true);
 
       await registerUser({
-        name,
-        email,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
 
@@ -93,16 +94,7 @@ function Register() {
         <div className="auth-brand-content">
 
           <div className="auth-logo">
-
-            <div className="auth-logo-icon">
-              S
-            </div>
-
-            <div>
-              <h2>SportRisk</h2>
-              <span>Injury Detection</span>
-            </div>
-
+            <BrandLogo />
           </div>
 
 
@@ -149,16 +141,7 @@ function Register() {
         <div className="auth-form-wrapper">
 
           <div className="auth-mobile-logo">
-
-            <div className="auth-logo-icon">
-              S
-            </div>
-
-            <div>
-              <h2>SportRisk</h2>
-              <span>Injury Detection</span>
-            </div>
-
+            <BrandLogo />
           </div>
 
 

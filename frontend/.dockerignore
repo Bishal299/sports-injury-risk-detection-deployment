@@ -1,5 +1,6 @@
 node_modules
 dist
+coverage
 .git
 .gitignore
 .dockerignore
@@ -11,3 +12,4 @@ yarn-error.log*
 !.env.example
 .vscode
 .idea
+*.log

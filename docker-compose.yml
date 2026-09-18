@@ -37,7 +37,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-sports_injury_db}
-      SECRET_KEY: ${SECRET_KEY:-sports_injury_production_secret_key_change_in_prod_12345}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in your .env before starting Docker Compose}
       ALGORITHM: ${ALGORITHM:-HS256}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8000}

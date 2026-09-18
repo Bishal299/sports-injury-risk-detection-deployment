@@ -1,0 +1,13 @@
+BEGIN;
+
+DROP INDEX IF EXISTS ix_professional_athlete_relationships_role_status;
+DROP INDEX IF EXISTS ix_professional_athlete_relationships_athlete_status;
+DROP INDEX IF EXISTS ix_professional_athlete_relationships_professional_status;
+DROP INDEX IF EXISTS ix_professional_athlete_relationships_status;
+DROP INDEX IF EXISTS ix_professional_athlete_relationships_professional_role;
+DROP INDEX IF EXISTS ix_professional_athlete_relationships_athlete_id;
+DROP INDEX IF EXISTS ix_professional_athlete_relationships_professional_user_id;
+DROP INDEX IF EXISTS uq_professional_athlete_relationships_active_pending_pair;
+DROP TABLE IF EXISTS professional_athlete_relationships;
+
+COMMIT;

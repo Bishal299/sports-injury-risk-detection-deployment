@@ -26,12 +26,16 @@ yarn-debug.log*
 pnpm-debug.log*
 
 # Build files
+
 dist/
 build/
 
 
 uploads/
 backend/uploads/
+
+# Runtime/generated backend storage
+backend/storage/
 
 # =========================
 # IDE / Editor

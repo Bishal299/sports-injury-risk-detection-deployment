@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 
+import BrandLogo from "../components/BrandLogo";
 import "../styles/landing.css";
 
 
@@ -99,14 +100,7 @@ function Landing() {
           to="/"
           className="landing-brand"
         >
-          <span className="landing-logo-icon">
-            S
-          </span>
-
-          <span>
-            <strong>SportRisk</strong>
-            <small>Injury Detection</small>
-          </span>
+          <BrandLogo />
         </Link>
 
         <nav className="landing-nav-links">
@@ -505,14 +499,7 @@ function Landing() {
             to="/"
             className="landing-brand"
           >
-            <span className="landing-logo-icon">
-              S
-            </span>
-
-            <span>
-              <strong>SportRisk</strong>
-              <small>Injury Detection</small>
-            </span>
+            <BrandLogo />
           </Link>
 
           <p>

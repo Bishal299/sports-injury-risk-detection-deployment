@@ -35,6 +35,13 @@ class AnalysisResultResponse(BaseModel):
     movement_quality: Optional[float] = None
     overall_risk_score: Optional[float] = None
     risk_level: Optional[str] = None
+    algorithm_version: Optional[str] = None
+    historical_score: Optional[float] = None
+    biomechanical_score: Optional[float] = None
+    asymmetry_score: Optional[float] = None
+    training_load_score: Optional[float] = None
+    composite_risk_score: Optional[float] = None
+    risk_category: Optional[str] = None
 
     # Status & progress
     status: str
@@ -51,8 +58,40 @@ class AnalysisResultResponse(BaseModel):
     summary_metrics: Optional[Dict[str, Any]] = None
     time_series_data: Optional[Dict[str, Any]] = None
     recommendations: Optional[List[Dict[str, Any]]] = None
+    risk_assessment: Optional[Dict[str, Any]] = None
 
     created_at: datetime
+    analysis_date: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AnalysisVideoSummary(BaseModel):
+    video_id: UUID
+    activity: Optional[str] = None
+    video_url: Optional[str] = None
+    uploaded_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AnalysisHistoryItem(BaseModel):
+    analysis_id: UUID
+    video_id: UUID
+    athlete_id: UUID
+    analysis_date: Optional[datetime] = None
+    algorithm_version: Optional[str] = None
+    historical_score: Optional[float] = None
+    biomechanical_score: Optional[float] = None
+    asymmetry_score: Optional[float] = None
+    training_load_score: Optional[float] = None
+    composite_risk_score: Optional[float] = None
+    overall_risk_score: Optional[float] = None
+    risk_category: Optional[str] = None
+    risk_level: Optional[str] = None
+    status: str
+    completed_at: Optional[datetime] = None
+    video: Optional[AnalysisVideoSummary] = None
 
     model_config = ConfigDict(from_attributes=True)

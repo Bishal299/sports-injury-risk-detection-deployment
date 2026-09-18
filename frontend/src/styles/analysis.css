@@ -219,7 +219,7 @@
   grid-template-columns: 1.15fr 0.85fr;
   gap: 22px;
   margin-bottom: 28px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* Video Section */
@@ -232,6 +232,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100%;
 }
 
 .video-card-header {
@@ -250,9 +251,11 @@
   border-radius: var(--radius-sm);
   padding: 3px;
   gap: 3px;
+  min-width: 260px;
 }
 
 .mode-toggle-btn {
+  flex: 1;
   padding: 6px 10px;
   border: none;
   background: transparent;
@@ -345,11 +348,13 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 22px;
+  padding: 20px 22px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .feature-icon-box {
@@ -1011,4 +1016,349 @@
   .video-player-wrapper {
     max-height: 220px;
   }
+}
+
+/* =========================================
+   RESTORED INJURY RISK DASHBOARD STYLES
+========================================= */
+
+.risk-hero-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition);
+}
+
+.risk-hero-box.low-risk {
+  border-color: rgba(22, 163, 74, 0.4);
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.08) 0%, var(--bg-primary) 100%);
+}
+
+.risk-hero-box.moderate-risk {
+  border-color: rgba(217, 119, 6, 0.4);
+  background: linear-gradient(180deg, rgba(217, 119, 6, 0.08) 0%, var(--bg-primary) 100%);
+}
+
+.risk-hero-box.high-risk {
+  border-color: rgba(234, 88, 12, 0.45);
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.09) 0%, var(--bg-primary) 100%);
+}
+
+.risk-hero-box.critical-risk {
+  border-color: rgba(220, 38, 38, 0.5);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.12) 0%, var(--bg-primary) 100%);
+}
+
+.risk-hero-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.risk-hero-number {
+  font-size: 2.2rem;
+  font-weight: 850;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.risk-hero-number.low-risk { color: var(--success); }
+.risk-hero-number.moderate-risk { color: var(--warning); }
+.risk-hero-number.high-risk { color: #ea580c; }
+.risk-hero-number.critical-risk { color: var(--danger); }
+
+.risk-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.risk-category-badge.low-risk {
+  background: rgba(22, 163, 74, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(22, 163, 74, 0.35);
+}
+
+.risk-category-badge.moderate-risk {
+  background: rgba(217, 119, 6, 0.15);
+  color: var(--warning);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+}
+
+.risk-category-badge.high-risk {
+  background: rgba(234, 88, 12, 0.15);
+  color: #ea580c;
+  border: 1px solid rgba(234, 88, 12, 0.35);
+}
+
+.risk-category-badge.critical-risk {
+  background: rgba(220, 38, 38, 0.18);
+  color: var(--danger);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+/* Secondary Tri-Score Row */
+.subscores-trio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0;
+}
+
+.subscore-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+
+.subscore-label {
+  font-size: 0.68rem;
+  font-weight: 650;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.subscore-val {
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: var(--text-primary);
+}
+
+/* Top Risk Factors Section */
+.risk-factors-container {
+  margin-top: 0;
+}
+
+.risk-factors-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.risk-factor-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  transition: all var(--transition);
+}
+
+.risk-factor-item:last-child {
+  margin-bottom: 0;
+}
+
+.risk-factor-item:hover {
+  border-color: var(--border-hover);
+  transform: translateX(2px);
+}
+
+.risk-factor-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.side-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.side-pill.right {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--accent);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.side-pill.left {
+  background: rgba(147, 51, 234, 0.1);
+  color: #a855f7;
+  border-color: rgba(147, 51, 234, 0.3);
+}
+
+.side-pill.bilateral {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.sev-tag {
+  font-size: 0.72rem;
+  font-weight: 750;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.sev-tag.critical {
+  background: rgba(220, 38, 38, 0.15);
+  color: var(--danger);
+}
+
+.sev-tag.high {
+  background: rgba(234, 88, 12, 0.15);
+  color: #ea580c;
+}
+
+.sev-tag.moderate {
+  background: rgba(217, 119, 6, 0.15);
+  color: var(--warning);
+}
+
+.sev-tag.low {
+  background: rgba(22, 163, 74, 0.15);
+  color: var(--success);
+}
+
+/* Recommendations Card Grid */
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.recommendation-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+}
+
+.recommendation-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.rec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rec-category {
+  font-weight: 700;
+  font-size: 0.96rem;
+  color: var(--text-primary);
+}
+
+.rec-priority-badge {
+  font-size: 0.72rem;
+  font-weight: 750;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rec-priority-badge.high {
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.rec-priority-badge.medium {
+  background: rgba(217, 119, 6, 0.12);
+  color: var(--warning);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.rec-priority-badge.low {
+  background: rgba(22, 163, 74, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+}
+
+.rec-observation {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  background: var(--bg-tertiary);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent);
+}
+
+.rec-action {
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.rec-drills-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.rec-drills-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.drills-chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.drill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
 }
