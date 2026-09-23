@@ -27,6 +27,7 @@ app/uploads/
 tests/
 test_*.py
 .pytest_cache/
+.pytest_temp/
 .coverage
 htmlcov/
 *.log

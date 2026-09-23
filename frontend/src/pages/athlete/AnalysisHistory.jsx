@@ -103,16 +103,16 @@ function AnalysisHistory() {
 
                   return (
                     <tr key={item.analysis_id}>
-                      <td>
+                      <td data-label="Video">
                         <strong>{item.video?.activity || "Movement Test"}</strong>
                         <span>{String(item.video_id).slice(0, 8)}...</span>
                       </td>
-                      <td>{formatDate(item.completed_at || item.analysis_date)}</td>
-                      <td>{scoreValue(item.historical_score)}</td>
-                      <td>{scoreValue(riskScore)}</td>
-                      <td>{risk}</td>
-                      <td>{item.algorithm_version || "N/A"}</td>
-                      <td>
+                      <td data-label="Date">{formatDate(item.completed_at || item.analysis_date)}</td>
+                      <td data-label="S_hist">{scoreValue(item.historical_score)}</td>
+                      <td data-label="Risk Score">{scoreValue(riskScore)}</td>
+                      <td data-label="Risk">{risk}</td>
+                      <td data-label="Algorithm">{item.algorithm_version || "N/A"}</td>
+                      <td data-label="Action">
                         <button
                           className="primary-button history-action-button"
                           onClick={() => navigate(`/analysis/${item.video_id}?analysisId=${item.analysis_id}`)}

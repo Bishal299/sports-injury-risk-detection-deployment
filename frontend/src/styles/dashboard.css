@@ -1987,6 +1987,7 @@
   .dashboard-main {
     width: 100%;
     min-height: 100vh;
+    margin-left: 0;
 
     padding-top: 64px;
 
@@ -2040,6 +2041,7 @@
   .dashboard-main {
     width: 100%;
     max-width: 100%;
+    margin-left: 0;
     box-sizing: border-box;
 
     overflow-x: hidden;

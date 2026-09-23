@@ -1251,7 +1251,7 @@
 /* Recommendations Card Grid */
 .recommendations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
   gap: 16px;
   margin-top: 16px;
 }
@@ -1361,4 +1361,21 @@
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .recommendation-card {
+    padding: 16px;
+  }
+
+  .rec-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
 }

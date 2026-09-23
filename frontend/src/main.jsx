@@ -6,17 +6,26 @@ import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 import { AthleteProfileProvider } from "./context/AthleteProfileContext";
+import { GOOGLE_CLIENT_ID, isGoogleAuthConfigured } from "./config/googleOAuth";
+
+const appTree = (
+  <React.StrictMode>
+    <AuthProvider>
+      <AthleteProfileProvider>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </AthleteProfileProvider>
+    </AuthProvider>
+  </React.StrictMode>
+);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
-      <AuthProvider>
-        <AthleteProfileProvider>
-          <ThemeProvider>
-            <App />
-          </ThemeProvider>
-        </AthleteProfileProvider>
-      </AuthProvider>
+  isGoogleAuthConfigured ? (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      {appTree}
     </GoogleOAuthProvider>
-  </React.StrictMode>
+  ) : (
+    appTree
+  )
 );

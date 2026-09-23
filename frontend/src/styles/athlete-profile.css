@@ -684,6 +684,52 @@
   color: var(--text-primary);
 }
 
+@media (max-width: 640px) {
+  .injury-table {
+    min-width: 0;
+  }
+
+  .injury-table,
+  .injury-table thead,
+  .injury-table tbody,
+  .injury-table tr,
+  .injury-table th,
+  .injury-table td {
+    display: block;
+  }
+
+  .injury-table thead {
+    display: none;
+  }
+
+  .injury-table tr {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .injury-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 7px 0;
+    border-bottom: 0;
+  }
+
+  .injury-table td::before {
+    flex: 0 0 38%;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    content: attr(data-label);
+  }
+
+  .table-action-button {
+    width: 100%;
+  }
+}
+
 .injury-row-actions,
 .injury-form-actions {
   display: flex;

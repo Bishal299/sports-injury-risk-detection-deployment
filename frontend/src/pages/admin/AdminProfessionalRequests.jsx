@@ -279,25 +279,25 @@ function AdminProfessionalRequests() {
                 <tbody>
                   {requests.map((request) => (
                     <tr key={request.request_id}>
-                      <td>
+                      <td data-label="Applicant">
                         <strong>{request.applicant_name || "Applicant"}</strong>
                         <span>{request.applicant_email || request.user_id}</span>
                       </td>
-                      <td>{formatRole(request.requested_role)}</td>
-                      <td>{request.primary_sport || "Not provided"}</td>
-                      <td>
+                      <td data-label="Requested Role">{formatRole(request.requested_role)}</td>
+                      <td data-label="Sport">{request.primary_sport || "Not provided"}</td>
+                      <td data-label="Experience">
                         {request.years_of_experience !== null &&
                         request.years_of_experience !== undefined
                           ? `${request.years_of_experience} years`
                           : "Not provided"}
                       </td>
-                      <td>{formatDate(request.submitted_at)}</td>
-                      <td>
+                      <td data-label="Submitted">{formatDate(request.submitted_at)}</td>
+                      <td data-label="Status">
                         <span className={`request-status ${request.status.toLowerCase()}`}>
                           {request.status}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Action">
                         <button
                           className="secondary-button"
                           disabled={reviewLoading}

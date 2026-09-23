@@ -1912,6 +1912,19 @@
   .coach-video-row > :nth-child(5) {
     display: inline-flex;
   }
+
+  .scientist-breakdown-table-row,
+  .team-comparison-row,
+  .comparison-metric-row {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .scientist-breakdown-table-row.head,
+  .team-comparison-row.head,
+  .comparison-metric-head {
+    display: none;
+  }
 }
 
 /* ==========================================================================
@@ -2779,4 +2792,3 @@
     justify-content: flex-end;
   }
 }
-

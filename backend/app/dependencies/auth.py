@@ -14,6 +14,9 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set before starting the backend")
+
 # auto_error=False allows requests with cookies instead of Authorization header to proceed to our cookie extractor
 security = HTTPBearer(auto_error=False)
 

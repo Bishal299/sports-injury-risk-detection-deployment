@@ -64,3 +64,57 @@
 .analysis-history-empty p {
   margin: 0 0 18px;
 }
+
+@media (max-width: 640px) {
+  .analysis-history-card {
+    overflow: visible;
+  }
+
+  .analysis-history-table {
+    min-width: 0;
+  }
+
+  .analysis-history-table,
+  .analysis-history-table thead,
+  .analysis-history-table tbody,
+  .analysis-history-table tr,
+  .analysis-history-table th,
+  .analysis-history-table td {
+    display: block;
+  }
+
+  .analysis-history-table thead {
+    display: none;
+  }
+
+  .analysis-history-table tr {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .analysis-history-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 7px 0;
+    border-bottom: 0;
+  }
+
+  .analysis-history-table td:first-child {
+    flex-direction: row;
+  }
+
+  .analysis-history-table td::before {
+    flex: 0 0 38%;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    content: attr(data-label);
+  }
+
+  .history-action-button {
+    width: 100%;
+  }
+}

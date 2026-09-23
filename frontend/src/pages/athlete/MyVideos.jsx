@@ -16,22 +16,11 @@ import {
 
 import {
   getMyVideos,
-  deleteVideo
+  deleteVideo,
+  resolveApiAssetUrl
 } from "../../services/api";
 
 import "../../styles/my-videos.css";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
-
-const formatMediaUrl = (url) => {
-  if (!url) return "";
-  const clean = url.replace(/\\/g, "/");
-  if (clean.startsWith("http://") || clean.startsWith("https://")) {
-    return clean;
-  }
-  const normalizedPath = clean.startsWith("/") ? clean : `/${clean}`;
-  return `${API_BASE_URL}${normalizedPath}`;
-};
 
 const formatDate = (dateString) => {
   if (!dateString) return "Recently";
@@ -247,7 +236,7 @@ function MyVideos() {
                 );
 
                 return videos.map((video) => {
-                  const videoUrl = formatMediaUrl(video.video_url);
+                  const videoUrl = resolveApiAssetUrl(video.video_url);
                   const rawStatus = (video.processing_status || "uploaded").toLowerCase();
                   const isAnalyzing = rawStatus === "processing";
                   const isCompleted = rawStatus === "analyzed" || rawStatus === "completed";
@@ -282,6 +271,7 @@ function MyVideos() {
                         </div>
                         <video
                           controls
+                          crossOrigin="anonymous"
                           preload="metadata"
                           playsInline
                           src={videoUrl}

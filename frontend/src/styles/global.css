@@ -499,6 +499,13 @@ a {
 
 }
 
+@media (max-width: 768px) {
+  .dashboard-main {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
 
 /* =========================================
    SMALL MOBILE
@@ -512,9 +519,9 @@ a {
 
 
   .dashboard-main {
-    width: calc(100% - 58px);
+    width: 100%;
 
-    margin-left: 58px;
+    margin-left: 0;
 
     padding: 14px 10px;
   }

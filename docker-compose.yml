@@ -43,6 +43,8 @@ services:
       BACKEND_URL: ${BACKEND_URL:-http://localhost:8000}
       BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:

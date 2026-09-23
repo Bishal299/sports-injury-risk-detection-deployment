@@ -1346,11 +1346,20 @@ export function resolveApiAssetUrl(path) {
     return "";
   }
 
-  if (/^https?:\/\//i.test(path)) {
-    return path;
+  const cleanPath = String(path).replace(/\\/g, "/").trim();
+
+  try {
+    const parsedUrl = new URL(cleanPath);
+    if (parsedUrl.pathname.startsWith("/uploads/")) {
+      return `${API_BASE_URL}${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+    }
+    return cleanPath;
+  } catch {
+    // Relative paths are handled below.
   }
 
-  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  const normalizedPath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+  return `${API_BASE_URL}${normalizedPath}`;
 }
 
 export async function submitProfessionalRoleRequest(requestData) {

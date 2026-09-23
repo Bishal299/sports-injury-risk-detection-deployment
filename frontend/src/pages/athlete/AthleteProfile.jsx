@@ -688,13 +688,13 @@ function AthleteProfile() {
                   <tbody>
                     {injuries.map((injury) => (
                       <tr key={injury.injury_id}>
-                        <td>{injury.injury_type}</td>
-                        <td>{injury.body_part}</td>
-                        <td>{formatLabel(injury.affected_side)}</td>
-                        <td>{formatLabel(injury.severity)}</td>
-                        <td>{formatLabel(injury.status)}</td>
-                        <td>{injury.injury_date}</td>
-                        <td>
+                        <td data-label="Injury">{injury.injury_type}</td>
+                        <td data-label="Body Part">{injury.body_part}</td>
+                        <td data-label="Side">{formatLabel(injury.affected_side)}</td>
+                        <td data-label="Severity">{formatLabel(injury.severity)}</td>
+                        <td data-label="Status">{formatLabel(injury.status)}</td>
+                        <td data-label="Date">{injury.injury_date}</td>
+                        <td data-label="Actions">
                           <div className="injury-row-actions">
                             <button
                               type="button"

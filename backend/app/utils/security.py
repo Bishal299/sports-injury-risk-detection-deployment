@@ -9,6 +9,9 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set before starting the backend")
 # Absolute maximum session lifetime is strictly 24 hours (1440 minutes), no sliding expiration
 MAX_SESSION_MINUTES = 1440
 _env_exp = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
@@ -44,7 +47,10 @@ def is_cookie_secure() -> bool:
 
 
 def get_cookie_samesite() -> str:
-    return os.getenv("COOKIE_SAMESITE", "lax").strip().lower()
+    samesite = os.getenv("COOKIE_SAMESITE", "lax").strip().lower()
+    if samesite not in {"lax", "strict", "none"}:
+        raise RuntimeError("COOKIE_SAMESITE must be one of: lax, strict, none")
+    return samesite
 
 
 def set_auth_cookie(response: Response, token: str) -> None:

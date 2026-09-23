@@ -105,7 +105,7 @@ function CoachAthleteVideos() {
                     <span>Video</span>
                   </div>
                   {video.video_url ? (
-                    <video controls preload="metadata" playsInline src={resolveApiAssetUrl(video.video_url)} />
+                    <video controls crossOrigin="anonymous" preload="metadata" playsInline src={resolveApiAssetUrl(video.video_url)} />
                   ) : (
                     <div className="coach-quiet-state">Preview not available</div>
                   )}

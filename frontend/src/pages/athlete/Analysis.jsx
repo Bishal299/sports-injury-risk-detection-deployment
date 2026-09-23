@@ -13,7 +13,8 @@ import {
   getMovementAnalysisStatus,
   getMovementAnalysisResult,
   getAnalysisById,
-  downloadReportFile
+  downloadReportFile,
+  resolveApiAssetUrl
 } from "../../services/api";
 
 import {
@@ -191,19 +192,6 @@ function SvgTimeSeriesChart({ data, timeline, label, unit = "°", color = "#2563
     </div>
   );
 }
-
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
-
-const formatMediaUrl = (url) => {
-  if (!url) return "";
-  const clean = url.replace(/\\/g, "/");
-  if (clean.startsWith("http://") || clean.startsWith("https://")) {
-    return clean;
-  }
-  const normalizedPath = clean.startsWith("/") ? clean : `/${clean}`;
-  return `${API_BASE_URL}${normalizedPath}`;
-};
 
 
 function Analysis({ viewer = "athlete" }) {
@@ -501,8 +489,8 @@ function Analysis({ viewer = "athlete" }) {
   const riskFactors = riskAssessment.risk_factors || [];
 
   // Robust formatted Video URLs
-  const originalVideoUrl = formatMediaUrl(video?.video_url);
-  const skeletonVideoUrl = formatMediaUrl(analysis?.skeleton_video_url) || originalVideoUrl;
+  const originalVideoUrl = resolveApiAssetUrl(video?.video_url);
+  const skeletonVideoUrl = resolveApiAssetUrl(analysis?.skeleton_video_url) || originalVideoUrl;
 
   const formatScoreValue = (value) => (
     value !== null && value !== undefined && Number.isFinite(Number(value))
@@ -551,9 +539,6 @@ function Analysis({ viewer = "athlete" }) {
             <p className="page-eyebrow">AI MOVEMENT PIPELINE</p>
             <h1>Movement Analysis</h1>
             <div className="analysis-meta-chips">
-              <div className="meta-chip">
-                <strong>Athlete:</strong> {video?.athlete?.user?.name || "Athlete"}
-              </div>
               <div className="meta-chip">
                 <strong>Activity:</strong> {video?.activity || "Not available"}
               </div>
@@ -695,6 +680,7 @@ function Analysis({ viewer = "athlete" }) {
                           ref={splitOrigRef}
                           src={originalVideoUrl}
                           controls
+                          crossOrigin="anonymous"
                           playsInline
                           preload="metadata"
                           onPlay={handleSplitPlay}
@@ -710,6 +696,7 @@ function Analysis({ viewer = "athlete" }) {
                           ref={splitSkelRef}
                           src={skeletonVideoUrl}
                           controls
+                          crossOrigin="anonymous"
                           playsInline
                           preload="metadata"
                           onPlay={handleSplitPlay}
@@ -726,6 +713,7 @@ function Analysis({ viewer = "athlete" }) {
                         ref={videoRef}
                         src={videoMode === 'skeleton' ? skeletonVideoUrl : originalVideoUrl}
                         controls
+                        crossOrigin="anonymous"
                         playsInline
                         preload="metadata"
                         key={videoMode}

@@ -284,7 +284,7 @@ function PhysiotherapistMovementAnalytics() {
                   </div>
                 </div>
                 <div className="video-player-wrapper">
-                  <video controls playsInline preload="metadata" src={videoUrl} />
+                  <video controls crossOrigin="anonymous" playsInline preload="metadata" src={videoUrl} />
                 </div>
               </div>
             ) : (

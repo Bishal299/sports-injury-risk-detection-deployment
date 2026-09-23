@@ -26,6 +26,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAthleteProfile } from "../context/AthleteProfileContext";
 import { getDefaultRouteForRole } from "../utils/roleRoutes";
 import BrandLogo from "../components/BrandLogo";
+import { isGoogleAuthConfigured } from "../config/googleOAuth";
 import "../styles/auth.css";
 
 const PORTAL_OPTIONS = [
@@ -84,11 +85,33 @@ function Login() {
   const [sessionExpiredMsg, setSessionExpiredMsg] = useState("");
 
   const portalButtonRefs = useRef([]);
+  const googleButtonContainerRef = useRef(null);
   const selectedPortalRef = useRef(selectedPortal);
+  const [googleButtonWidth, setGoogleButtonWidth] = useState(null);
 
   useEffect(() => {
     selectedPortalRef.current = selectedPortal;
   }, [selectedPortal]);
+
+  useEffect(() => {
+    if (!isGoogleAuthConfigured || !googleButtonContainerRef.current) {
+      return undefined;
+    }
+
+    const updateGoogleButtonWidth = () => {
+      const containerWidth = googleButtonContainerRef.current?.offsetWidth || 0;
+      if (containerWidth > 0) {
+        setGoogleButtonWidth(Math.floor(Math.min(containerWidth, 400)));
+      }
+    };
+
+    updateGoogleButtonWidth();
+
+    const resizeObserver = new ResizeObserver(updateGoogleButtonWidth);
+    resizeObserver.observe(googleButtonContainerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   useEffect(() => {
     if (location.state?.expiredMessage) {
@@ -504,18 +527,30 @@ function Login() {
           </div>
 
           <div
+            ref={googleButtonContainerRef}
             className="google-button-container"
             aria-label="Continue with Google"
           >
-            <GoogleLogin
-              onSuccess={handleGoogleCredential}
-              onError={() => setError("Google Sign In was not successful. Please ensure origin is authorized in Google Cloud Console.")}
-              theme="outline"
-              size="large"
-              width="100%"
-              text="continue_with"
-              shape="rectangular"
-            />
+            {isGoogleAuthConfigured ? (
+              <GoogleLogin
+                onSuccess={handleGoogleCredential}
+                onError={() => setError("Google Sign In was not successful. Please ensure origin is authorized in Google Cloud Console.")}
+                theme="outline"
+                size="large"
+                {...(googleButtonWidth ? { width: googleButtonWidth } : {})}
+                text="continue_with"
+                shape="rectangular"
+              />
+            ) : (
+              <button
+                type="button"
+                className="google-btn-fallback"
+                disabled
+                aria-disabled="true"
+              >
+                Google Sign-In is not configured
+              </button>
+            )}
           </div>
 
           <p className="auth-footer">
