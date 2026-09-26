@@ -1922,9 +1922,9 @@ export async function getVideoDetails(videoId) {
   return data;
 }
 
-export async function triggerMovementAnalysis(videoId) {
+export async function triggerMovementAnalysis(videoId, options = {}) {
   const response = await fetch(
-    `${API_BASE_URL}/analysis/${videoId}`,
+    options.force ? `${API_BASE_URL}/analysis/${videoId}?force=true` : `${API_BASE_URL}/analysis/${videoId}`,
     {
       method: "POST",
       headers: {
@@ -1944,7 +1944,7 @@ export async function triggerMovementAnalysis(videoId) {
   return data;
 }
 
-export async function getMovementAnalysisStatus(videoId) {
+export async function getMovementAnalysisStatus(videoId, options = {}) {
   const response = await fetch(
     `${API_BASE_URL}/analysis/${videoId}/status`,
     {
@@ -1952,15 +1952,19 @@ export async function getMovementAnalysisStatus(videoId) {
       headers: {
         ...getAuthHeaders(),
       },
+      signal: options.signal,
     }
   );
 
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(
+    const error = new Error(
       data.detail || "Failed to fetch analysis status"
     );
+    error.status = response.status;
+    error.retryAfter = response.headers.get("Retry-After");
+    throw error;
   }
 
   return data;

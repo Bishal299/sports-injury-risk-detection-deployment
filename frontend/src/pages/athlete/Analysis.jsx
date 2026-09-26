@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import {
@@ -39,6 +39,40 @@ import {
 } from "lucide-react";
 
 import "../../styles/analysis.css";
+
+const ANALYSIS_STATUS_POLL_INTERVAL_MS = 5000;
+const ANALYSIS_STATUS_MAX_BACKOFF_MS = 60000;
+
+function parseRetryAfterMs(retryAfter) {
+  if (!retryAfter) return null;
+
+  const seconds = Number(retryAfter);
+  if (Number.isFinite(seconds)) {
+    return Math.max(seconds * 1000, ANALYSIS_STATUS_POLL_INTERVAL_MS);
+  }
+
+  const retryDate = Date.parse(retryAfter);
+  if (Number.isNaN(retryDate)) return null;
+
+  return Math.max(retryDate - Date.now(), ANALYSIS_STATUS_POLL_INTERVAL_MS);
+}
+
+function getStatusPollingDelay(error, retryCount) {
+  const shouldBackOff = error?.status === 429 || error?.status == null;
+  if (!shouldBackOff) {
+    return ANALYSIS_STATUS_POLL_INTERVAL_MS;
+  }
+
+  const retryAfterMs = parseRetryAfterMs(error.retryAfter);
+  if (retryAfterMs !== null) {
+    return Math.min(retryAfterMs, ANALYSIS_STATUS_MAX_BACKOFF_MS);
+  }
+
+  return Math.min(
+    ANALYSIS_STATUS_POLL_INTERVAL_MS * (2 ** retryCount),
+    ANALYSIS_STATUS_MAX_BACKOFF_MS
+  );
+}
 
 
 function SvgTimeSeriesChart({ data, timeline, label, unit = "°", color = "#2563eb", minVal = null, maxVal = null, threshold = null }) {
@@ -220,10 +254,132 @@ function Analysis({ viewer = "athlete" }) {
   const splitOrigRef = useRef(null);
   const splitSkelRef = useRef(null);
   const syncingSplitVideosRef = useRef(false);
+  const analysisPollingRef = useRef({
+    timeoutId: null,
+    abortController: null,
+    generation: 0,
+    rateLimitRetryCount: 0,
+  });
+
+  const cancelAnalysisPolling = useCallback(() => {
+    const polling = analysisPollingRef.current;
+    polling.generation += 1;
+    polling.rateLimitRetryCount = 0;
+
+    if (polling.timeoutId) {
+      clearTimeout(polling.timeoutId);
+      polling.timeoutId = null;
+    }
+
+    if (polling.abortController) {
+      polling.abortController.abort();
+      polling.abortController = null;
+    }
+  }, []);
+
+  const startAnalysisPolling = useCallback(() => {
+    cancelAnalysisPolling();
+    const generation = analysisPollingRef.current.generation;
+
+    const isCurrentPolling = () => analysisPollingRef.current.generation === generation;
+
+    const clearScheduledPoll = () => {
+      const polling = analysisPollingRef.current;
+      if (polling.timeoutId) {
+        clearTimeout(polling.timeoutId);
+        polling.timeoutId = null;
+      }
+    };
+
+    const stopCurrentPolling = () => {
+      if (!isCurrentPolling()) return;
+      const polling = analysisPollingRef.current;
+      clearScheduledPoll();
+      polling.rateLimitRetryCount = 0;
+      if (polling.abortController) {
+        polling.abortController.abort();
+        polling.abortController = null;
+      }
+    };
+
+    const schedulePoll = (delayMs = ANALYSIS_STATUS_POLL_INTERVAL_MS) => {
+      if (!isCurrentPolling()) return;
+      clearScheduledPoll();
+      analysisPollingRef.current.timeoutId = setTimeout(pollStatus, delayMs);
+    };
+
+    const pollStatus = async () => {
+      if (!isCurrentPolling()) return;
+
+      const controller = new AbortController();
+      analysisPollingRef.current.abortController = controller;
+
+      try {
+        const stat = await getMovementAnalysisStatus(videoId, {
+          signal: controller.signal,
+        });
+
+        if (!isCurrentPolling() || controller.signal.aborted) return;
+        analysisPollingRef.current.abortController = null;
+        analysisPollingRef.current.rateLimitRetryCount = 0;
+        setProgress(stat.progress || 0);
+        setStage(stat.stage || "Processing...");
+
+        if (stat.status === "completed") {
+          clearScheduledPoll();
+          const fullResult = await getMovementAnalysisResult(videoId);
+          if (!isCurrentPolling()) return;
+          setAnalysis(fullResult);
+          setStatus("completed");
+          setProgress(100);
+          setStage("Analysis complete");
+          window.dispatchEvent(new Event("analysis-history-updated"));
+          stopCurrentPolling();
+        } else if (stat.status === "failed") {
+          setStatus("failed");
+          setError(stat.error_message || "Video movement processing encountered an error.");
+          stopCurrentPolling();
+        } else {
+          schedulePoll();
+        }
+      } catch (pollErr) {
+        if (controller.signal.aborted || !isCurrentPolling()) return;
+        analysisPollingRef.current.abortController = null;
+
+        if (pollErr?.status === 401) {
+          stopCurrentPolling();
+          return;
+        }
+
+        console.error("Polling error:", pollErr);
+        const delayMs = getStatusPollingDelay(
+          pollErr,
+          analysisPollingRef.current.rateLimitRetryCount
+        );
+        if (pollErr?.status === 429 || pollErr?.status == null) {
+          analysisPollingRef.current.rateLimitRetryCount += 1;
+        }
+        if (analysisPollingRef.current.rateLimitRetryCount >= 8) {
+          stopCurrentPolling();
+          setStatus("failed");
+          setError("Server connection timed out or is rate-limited. Please click Retry Analysis.");
+          return;
+        }
+        schedulePoll(delayMs);
+      }
+    };
+
+    schedulePoll();
+  }, [cancelAnalysisPolling, videoId]);
 
   // 1. Initial Load & Polling Logic
   useEffect(() => {
-    let intervalId = null;
+    let isEffectCancelled = false;
+
+    const stopForAuthChange = () => {
+      isEffectCancelled = true;
+      cancelAnalysisPolling();
+    };
 
     const initAnalysis = async () => {
       try {
@@ -276,9 +432,11 @@ function Analysis({ viewer = "athlete" }) {
 
         // Check if analysis already exists
         const stat = await getMovementAnalysisStatus(videoId);
+        if (isEffectCancelled) return;
 
         if (stat.status === "completed") {
           const fullResult = await getMovementAnalysisResult(videoId);
+          if (isEffectCancelled) return;
           setAnalysis(fullResult);
           setStatus("completed");
           setProgress(100);
@@ -288,54 +446,46 @@ function Analysis({ viewer = "athlete" }) {
           setStatus("processing");
           setProgress(stat.progress || 15);
           setStage(stat.stage || "Processing video...");
-          startPolling();
+          startAnalysisPolling();
         } else {
           // Trigger analysis automatically if pending
           setStatus("processing");
           setProgress(10);
           setStage("Initializing analysis pipeline...");
           await triggerMovementAnalysis(videoId);
-          startPolling();
+          if (!isEffectCancelled) {
+            startAnalysisPolling();
+          }
         }
       } catch (err) {
+        if (isEffectCancelled || err?.status === 401) {
+          return;
+        }
         console.error("Init analysis error:", err);
         setError(err.message || "Failed to initialize analysis");
         setStatus("failed");
       }
     };
 
-    const startPolling = () => {
-      intervalId = setInterval(async () => {
-        try {
-          const stat = await getMovementAnalysisStatus(videoId);
-          setProgress(stat.progress || 0);
-          setStage(stat.stage || "Processing...");
-
-          if (stat.status === "completed") {
-            clearInterval(intervalId);
-            const fullResult = await getMovementAnalysisResult(videoId);
-            setAnalysis(fullResult);
-            setStatus("completed");
-            setProgress(100);
-            setStage("Analysis complete");
-            window.dispatchEvent(new Event("analysis-history-updated"));
-          } else if (stat.status === "failed") {
-            clearInterval(intervalId);
-            setStatus("failed");
-            setError(stat.error_message || "Video movement processing encountered an error.");
-          }
-        } catch (pollErr) {
-          console.error("Polling error:", pollErr);
-        }
-      }, 1500);
-    };
-
+    window.addEventListener("auth-logout", stopForAuthChange);
+    window.addEventListener("session-expired", stopForAuthChange);
     initAnalysis();
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      isEffectCancelled = true;
+      window.removeEventListener("auth-logout", stopForAuthChange);
+      window.removeEventListener("session-expired", stopForAuthChange);
+      cancelAnalysisPolling();
     };
-  }, [videoId, analysisId, athleteId, isProfessionalView, isPhysiotherapistView]);
+  }, [
+    videoId,
+    analysisId,
+    athleteId,
+    isProfessionalView,
+    isPhysiotherapistView,
+    cancelAnalysisPolling,
+    startAnalysisPolling,
+  ]);
 
   // Re-trigger analysis handler
   const handleRerunAnalysis = async () => {
@@ -344,6 +494,7 @@ function Analysis({ viewer = "athlete" }) {
     }
 
     try {
+      cancelAnalysisPolling();
       setStatus("processing");
       setProgress(5);
       setStage("Re-initializing video pipeline...");
@@ -351,26 +502,13 @@ function Analysis({ viewer = "athlete" }) {
       if (analysisId) {
         navigate(`/analysis/${videoId}`, { replace: true });
       }
-      await triggerMovementAnalysis(videoId);
-
-      const interval = setInterval(async () => {
-        const stat = await getMovementAnalysisStatus(videoId);
-        setProgress(stat.progress || 0);
-        setStage(stat.stage || "Processing...");
-        if (stat.status === "completed") {
-          clearInterval(interval);
-          const fullResult = await getMovementAnalysisResult(videoId);
-          setAnalysis(fullResult);
-          setStatus("completed");
-          setProgress(100);
-          window.dispatchEvent(new Event("analysis-history-updated"));
-        } else if (stat.status === "failed") {
-          clearInterval(interval);
-          setStatus("failed");
-          setError(stat.error_message || "Processing failed");
-        }
-      }, 1500);
+      await triggerMovementAnalysis(videoId, { force: true });
+      startAnalysisPolling();
     } catch (err) {
+      if (err?.status === 401) {
+        cancelAnalysisPolling();
+        return;
+      }
       setError(err.message || "Failed to re-run analysis");
       setStatus("failed");
     }
@@ -611,6 +749,20 @@ function Analysis({ viewer = "athlete" }) {
                 ✓ Reports Generation
               </div>
             </div>
+
+            {!isProfessionalView && (
+              <div style={{ marginTop: "18px" }}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={handleRerunAnalysis}
+                  style={{ fontSize: "0.82rem", padding: "6px 14px", opacity: 0.9 }}
+                >
+                  <RefreshCw size={14} />
+                  <span>Restart Analysis</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 

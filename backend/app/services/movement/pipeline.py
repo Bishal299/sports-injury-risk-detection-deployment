@@ -33,6 +33,75 @@ from app.services.movement.skeleton_renderer import render_skeleton_video
 from app.services.reports.csv_generator import generate_csv_report
 from app.services.reports.ml_dataset import export_ml_dataset
 from app.services.reports.pdf_generator import generate_pdf_report
+import time
+import threading
+
+
+# ============================================================
+# ACTIVE IN-MEMORY JOB HEARTBEAT REGISTRY
+# ============================================================
+
+_JOB_REGISTRY_LOCK = threading.Lock()
+_ACTIVE_ANALYSIS_JOBS: Dict[str, Dict[str, Any]] = {}
+
+
+def register_active_job(analysis_id: Any, video_id: Any):
+    if not analysis_id:
+        return
+    with _JOB_REGISTRY_LOCK:
+        now = time.time()
+        _ACTIVE_ANALYSIS_JOBS[str(analysis_id)] = {
+            "video_id": str(video_id),
+            "start_time": now,
+            "last_heartbeat": now,
+        }
+
+
+def update_job_heartbeat(analysis_id: Any):
+    if not analysis_id:
+        return
+    with _JOB_REGISTRY_LOCK:
+        job = _ACTIVE_ANALYSIS_JOBS.get(str(analysis_id))
+        if job:
+            job["last_heartbeat"] = time.time()
+
+
+def unregister_active_job(analysis_id: Any):
+    if not analysis_id:
+        return
+    with _JOB_REGISTRY_LOCK:
+        _ACTIVE_ANALYSIS_JOBS.pop(str(analysis_id), None)
+
+
+def is_analysis_actively_running(analysis_id: Any, max_stale_seconds: float = 120.0) -> bool:
+    """
+    Returns True if this analysis is actively executing in this worker process
+    and has updated its heartbeat within the last `max_stale_seconds`.
+    """
+    if not analysis_id:
+        return False
+    with _JOB_REGISTRY_LOCK:
+        job = _ACTIVE_ANALYSIS_JOBS.get(str(analysis_id))
+        if not job:
+            return False
+        return (time.time() - job["last_heartbeat"]) < max_stale_seconds
+
+
+def is_video_actively_analyzing(video_id: Any, max_stale_seconds: float = 120.0) -> bool:
+    """
+    Returns True if any analysis for this video_id is actively executing
+    in this worker process with a recent heartbeat.
+    """
+    if not video_id:
+        return False
+    with _JOB_REGISTRY_LOCK:
+        vid_str = str(video_id)
+        now = time.time()
+        for job in _ACTIVE_ANALYSIS_JOBS.values():
+            if job.get("video_id") == vid_str:
+                if (now - job.get("last_heartbeat", 0)) < max_stale_seconds:
+                    return True
+        return False
 
 
 # ============================================================
@@ -228,6 +297,7 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
 
         db.commit()
         db.refresh(analysis)
+        register_active_job(analysis.analysis_id, video.video_id)
 
         # ====================================================
         # 3. LOCATE SOURCE VIDEO
@@ -244,6 +314,7 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
         analysis.progress = 15
         analysis.stage = "Preprocessing video & evaluating skeleton validity per frame..."
         db.commit()
+        update_job_heartbeat(analysis.analysis_id)
 
         reader = VideoReader(video_path)
         fps = float(reader.fps) if reader.fps and reader.fps > 0 else 30.0
@@ -289,6 +360,8 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
 
                 frame_idx += 1
                 total_frames += 1
+                if frame_idx % 30 == 0:
+                    update_job_heartbeat(analysis.analysis_id)
 
         finally:
             reader.release()
@@ -435,19 +508,29 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
         analysis.progress = 75
         analysis.stage = "Rendering skeleton visualizer video..."
         db.commit()
+        update_job_heartbeat(analysis.analysis_id)
 
         os.makedirs(SKELETON_DIR, exist_ok=True)
         skeleton_filename = f"{video_id}_skeleton.mp4"
         skeleton_filepath = os.path.join(SKELETON_DIR, skeleton_filename)
 
-        render_skeleton_video(
-            source_video_path=video_path,
-            output_video_path=skeleton_filepath,
-            frames_landmarks=frames_landmarks,
-            fps=fps
-        )
-
-        skeleton_video_url = f"{BACKEND_URL}/uploads/analysis/skeleton/{skeleton_filename}"
+        skeleton_video_url = None
+        skeleton_render_error = None
+        try:
+            render_skeleton_video(
+                source_video_path=video_path,
+                output_video_path=skeleton_filepath,
+                frames_landmarks=frames_landmarks,
+                fps=fps
+            )
+            if os.path.exists(skeleton_filepath) and os.path.getsize(skeleton_filepath) > 0:
+                skeleton_video_url = f"{BACKEND_URL}/uploads/analysis/skeleton/{skeleton_filename}"
+            else:
+                skeleton_render_error = "Skeleton video file was not generated or was empty."
+        except Exception as skel_err:
+            skeleton_render_error = str(skel_err)
+            print(f"Warning: Skeleton visualizer video rendering failed: {skel_err}")
+            skeleton_video_url = None
 
         # ====================================================
         # 9. GENERATE DATASET CSVs
@@ -455,6 +538,7 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
         analysis.progress = 85
         analysis.stage = "Generating frame-level & ML CSV feature datasets..."
         db.commit()
+        update_job_heartbeat(analysis.analysis_id)
 
         os.makedirs(REPORTS_DIR, exist_ok=True)
         import shutil
@@ -525,6 +609,7 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
         analysis.progress = 90
         analysis.stage = "Calculating rule-based injury risk & generating PDF report..."
         db.commit()
+        update_job_heartbeat(analysis.analysis_id)
 
         # Fetch athlete injury history
         athlete_injuries = []
@@ -588,6 +673,7 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
         analysis.progress = 98
         analysis.stage = "Finalizing risk assessment and feature dataset..."
         db.commit()
+        update_job_heartbeat(analysis.analysis_id)
 
         # Real scalar measurements (or None if unavailable)
         max_knee_valgus = valgus_data.get("max_deviation")
@@ -625,6 +711,17 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
         analysis.risk_level = str(risk_assessment.get("risk_category", "Low Risk"))
         analysis.recommendations = risk_assessment.get("recommendations", [])
 
+        # Explicit artifact status tracking
+        summary_payload["artifacts_status"] = {
+            "skeleton_video": "available" if skeleton_video_url else "unavailable",
+            "csv_timeseries": "available" if csv_report_url else "unavailable",
+            "pdf_report": "available" if pdf_report_url else "unavailable",
+        }
+        if skeleton_render_error:
+            summary_payload["artifact_warnings"] = [
+                f"Virtual skeleton video artifact unavailable: {skeleton_render_error}"
+            ]
+
         # Generated asset URLs
         analysis.skeleton_video_url = skeleton_video_url
         analysis.csv_report_url = csv_report_url
@@ -637,7 +734,10 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
         # Mark completed
         analysis.status = "completed"
         analysis.progress = 100
-        analysis.stage = "Feature extraction complete"
+        if skeleton_video_url:
+            analysis.stage = "Feature extraction complete"
+        else:
+            analysis.stage = "Feature extraction complete (skeleton video unavailable)"
         analysis.completed_at = datetime.utcnow()
 
         video.processing_status = "analyzed"
@@ -658,4 +758,5 @@ def run_movement_analysis_pipeline(video_id: UUID, analysis_id: UUID | None = No
             db.commit()
 
     finally:
+        unregister_active_job(analysis.analysis_id if analysis else analysis_id)
         db.close()

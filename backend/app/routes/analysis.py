@@ -1,6 +1,7 @@
 import os
+from datetime import datetime
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -11,7 +12,11 @@ from app.models.athlete import Athlete
 from app.models.video import Video
 from app.models.analysis_result import AnalysisResult
 from app.schemas.analysis_result import AnalysisHistoryItem, AnalysisResultResponse, AnalysisStatusResponse
-from app.services.movement.pipeline import run_movement_analysis_pipeline
+from app.services.movement.pipeline import (
+    run_movement_analysis_pipeline,
+    is_analysis_actively_running,
+    is_video_actively_analyzing,
+)
 
 
 router = APIRouter(
@@ -50,6 +55,7 @@ def _get_athlete_and_video(video_id: UUID, current_user: User, db: Session):
 def trigger_analysis(
     video_id: UUID,
     background_tasks: BackgroundTasks,
+    force: bool = Query(False, description="Force restart analysis even if one is recorded as processing"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -58,6 +64,8 @@ def trigger_analysis(
     Runs asynchronously in background tasks.
     """
     athlete, video = _get_athlete_and_video(video_id, current_user, db)
+
+    now = datetime.utcnow()
 
     processing = (
         db.query(AnalysisResult)
@@ -69,7 +77,22 @@ def trigger_analysis(
         .first()
     )
     if processing:
-        return processing
+        if force:
+            processing.status = "failed"
+            processing.stage = "Superseded by user request"
+            processing.error_message = "Analysis restarted by user."
+            db.commit()
+        elif is_analysis_actively_running(processing.analysis_id):
+            return processing
+        else:
+            age_seconds = (now - processing.created_at).total_seconds() if processing.created_at else 999
+            if age_seconds > 60:
+                processing.status = "failed"
+                processing.stage = "Previous run was interrupted"
+                processing.error_message = "Previous run was interrupted by a server restart. Starting a fresh analysis."
+                db.commit()
+            else:
+                return processing
 
     active_analysis = (
         db.query(AnalysisResult)
@@ -82,10 +105,23 @@ def trigger_analysis(
         .first()
     )
     if active_analysis:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Another video analysis is already running. Please wait for it to finish before starting a new one.",
-        )
+        if is_analysis_actively_running(active_analysis.analysis_id) and not force:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Another video analysis is already running. Please wait for it to finish before starting a new one.",
+            )
+        else:
+            age_seconds = (now - active_analysis.created_at).total_seconds() if active_analysis.created_at else 999
+            if force or age_seconds > 60:
+                active_analysis.status = "failed"
+                active_analysis.stage = "Previous run was interrupted"
+                active_analysis.error_message = "Previous run was interrupted by a server restart."
+                db.commit()
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Another video analysis is already running. Please wait for it to finish before starting a new one.",
+                )
 
     analysis = AnalysisResult(
         video_id=video.video_id,
@@ -200,6 +236,24 @@ def get_analysis_status(
             progress=0,
             stage="Not started"
         )
+
+    # Distinguish active running jobs from orphaned ones after a container crash/restart
+    if analysis.status == "processing":
+        if is_analysis_actively_running(analysis.analysis_id):
+            # Actively running with live heartbeats: NEVER mark as failed, regardless of duration
+            pass
+        else:
+            # Not active in this worker process. Check 60s startup grace period for background tasks.
+            age_seconds = (datetime.utcnow() - analysis.created_at).total_seconds() if analysis.created_at else 999
+            if age_seconds > 60:
+                analysis.status = "failed"
+                analysis.stage = "Analysis interrupted"
+                analysis.error_message = (
+                    "Video analysis was interrupted because the server restarted or exceeded memory limits. "
+                    "Please click Retry Analysis."
+                )
+                db.commit()
+                db.refresh(analysis)
 
     return analysis
 
