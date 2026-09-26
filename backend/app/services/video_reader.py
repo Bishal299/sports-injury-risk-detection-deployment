@@ -52,7 +52,7 @@ class VideoReader:
             "duration": self.duration
         }
 
-    def frames(self, max_dim: int = 960):
+    def frames(self):
 
         while True:
 
@@ -60,15 +60,6 @@ class VideoReader:
 
             if not success or frame is None:
                 break
-
-            h, w = frame.shape[:2]
-            if max_dim and max(h, w) > max_dim:
-                scale = max_dim / float(max(h, w))
-                frame = cv2.resize(
-                    frame,
-                    (int(w * scale), int(h * scale)),
-                    interpolation=cv2.INTER_AREA
-                )
 
             yield frame
 
